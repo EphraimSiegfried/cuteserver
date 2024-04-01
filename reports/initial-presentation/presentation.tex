@@ -38,60 +38,41 @@
 \begin{frame}[c]{Problem Statement}
 \begin{columns}[c]
     \column{.55\textwidth}
-            \includegraphics[width=0.8\textwidth]{block}
+            \includegraphics[width=\textwidth]{webserver-comic.jpg}
     \column{.45\textwidth}
-Introduce the problem you are trying to solve,
-motivate why solving this problem is important, highlight the
-significance of solving this problem. (What are you trying to do and
-why?)
+   We visit web pages all the time and want to understand the underlying processes. Therefore we want to build our own web server.
 \end{columns}
 \end{frame}
 
 \note{Notes can help you to remember important information. Turn on the notes option.}
 
 \begin{frame}[c]{Proposed solution}
-    \begin{figure}
-        \includegraphics[width=0.8\textwidth]{turingmachine}
-        \caption{How do you plan to solve this problem? Will you
-require any hardware to do so (e.g., Raspberry Pies)? Will you require
-any third-party software or libraries?}
-    \end{figure}
+  A multithreaded web server with the following properties:
+  \begin{itemize}
+ \item Process HTTP requests
+    \item Multiple clients can connect
+    \item Simple database management / concurrent access to resources 
+    \item Error handling: returning correct server errors
+    \item Log web traffic
+    \item Handle multiple domains and resources
+    \item Hopefully: Websocket support
+  \end{itemize}
 \end{frame}
 
 \note{Notes can help you to remember important information. Turn on the notes option.}
 
 \begin{frame}[c]{Preliminary Time Plan}
-\begin{theorem}
-Provide a preliminary time plan (e.g., Gantt
-chart in a readable form) and division of work among group members.
-\end{theorem}
+  \centering
+  \includegraphics[width=0.8\textwidth]{gantt_chart.png}
 \end{frame}
 
 \note{Notes can help you to remember important information. Turn on the notes option.}
 
 \section{Section 2}
 
-\begin{frame}[t]{Items and Numbers}
-\begin{columns}
-    \column{.5\textwidth}
-            \begin{itemize}
-            \item one
-            \item two
-            \item three
-            \end{itemize}
-    \column{.5\textwidth}
-            \begin{enumerate}
-            \item first
-            \item second
-            \item third
-            \end{enumerate}
-\end{columns}
-\end{frame}
-
 
 \begin{frame}[t,plain]
-\lastpage{{\usebeamerfont{title} Questions?}\\[5ex]
-author@email.com}
+  \lastpage{{\usebeamerfont{title} Questions?}}
 \end{frame}
 
 \end{document}
