@@ -51,7 +51,6 @@ int send_error(int socket_fd, int type) {
     sprintf(content, "\n\n<html><head>\n<title>%d %s</title>\n</head><body>\n<h1>%s</h1>\n%s\n</body></html>\n", type, err_name, err_name, message);
     content_len = strlen(content);
     sprintf(response, "HTTP/1.1 %d %s\nContent-Length: %d\nConnection: close\nContent-Type: text/html\n\n%s", type, err_name, content_len, content);
-    printf("PRINTING RESPONSE !!!!!!%s", response);
     long response_len = strlen(response);
     write(socket_fd, response, response_len);
     sleep(1);// allow socket to drain before signalling the socket is closed

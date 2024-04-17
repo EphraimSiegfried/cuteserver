@@ -16,10 +16,9 @@ void *serve(void *client_sock) {
     int ret = read(*client_socket, buff, sizeof(buff));
     int request_line_indices[3];
     int index = 0;
-    // [3,5,13]
-    // (0,3)=get, (3,5)
+    //TODO: error handling for reading from buffer
     for (size_t i = 0; i < ret; i++) {
-        printf("%c", buff[i]);
+        // printf("%c", buff[i]);
         if (buff[i] == ' ') {
             request_line_indices[index] = i;
             index++;
@@ -32,16 +31,24 @@ void *serve(void *client_sock) {
     for (size_t i = 0; i < 3; i++) {
         printf("%d ", request_line_indices[i]);
     }
-    // 1. erste linie identifizieren
-    // 2. analysieren
-    // 3.
-    //TODO: error handling for reading from buffer
-    // printf("%s", buff);
-    //hashmap info = parse_request(*buff)
-    fflush(stdout);
-    //TODO:Check if the request is a valid http request
-    send_ok(*client_socket, "/index.html", "text/html");
-    close(*client_socket);
+    if (strncmp(buff, "GET", request_line_indices[0]) == 0) {
+        char file_path[MAX_BUF_SIZE];
+        int file_path_len = request_line_indices[1] - request_line_indices[0]; 
+        strncpy(file_path, &buff[request_line_indices[0]], file_path_len); 
+        printf("%s", file_path);
+        fflush(stdout);
+        if (strlen(file_path) == 2 && strncmp(file_path," /", 2) == 0){ //TODO: remove whitespace ...
+            sprintf(file_path, "%s", "/index.html"); 
+        } 
+        printf("FILE PATH: %s", file_path);
+        fflush(stdout); 
+        if (access(file_path, F_OK) != 0){
+            send_error(*client_socket,404);
+            return NULL;
+        }
+        send_ok(*client_socket, file_path, "text/html");
+    } 
+    // TODO: hashmap info = parse_request(*buff)
     return NULL;
 }
 
