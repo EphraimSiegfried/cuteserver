@@ -20,7 +20,6 @@ void *serve(void *client_sock) {
     int index = 0;
     //TODO: error handling for reading from buffer
     for (size_t i = 0; i < ret; i++) {
-        // printf("%c", buff[i]);
         if (buff[i] == ' ') {
             request_line_indices[index] = i;
             index++;
@@ -35,15 +34,10 @@ void *serve(void *client_sock) {
         char file_path[MAX_BUF_SIZE];
         int file_path_len = request_line_indices[1] - request_line_indices[0];
         strncpy(file_path, &buff[request_line_indices[0] + 1], file_path_len - 1);// +1 because of whitespace
-        printf("%s", file_path);
-        fflush(stdout);
         if (strlen(file_path) == 1 && strncmp(file_path, "/", 1) == 0) {
             sprintf(file_path, "%s", "/index.html");
         }
-        printf("\nFILE PATH: %s, LENGTH: %lu", file_path, strlen(file_path));
-        fflush(stdout);
         if (access(file_path, F_OK) != 0) {
-            printf("\naccess not granted\n");
             send_error(*client_socket, 404);
             return NULL;
         }
