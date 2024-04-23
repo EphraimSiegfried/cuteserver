@@ -1,5 +1,4 @@
 #include "log.h"
-#include "response.h"
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -9,6 +8,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "parser.h"
+#include "request.h"
 
 #define MAX_BUF_SIZE 8122
 #define MAX_PENDING 21
@@ -18,19 +18,19 @@ void *serve(void *client_sock) {
     char buff[MAX_BUF_SIZE];
     int ret = read(*client_socket, buff, sizeof(buff));
     request_info req_i;
-    log_debug("serve"); 
-    parse_request(buff, ret, &req_i);
-    if (strcmp(req_i.type, "GET") == 0) {
-        if (strlen(req_i.file_path) == 1 && strcmp(req_i.file_path, "/") == 0) {
-            sprintf(req_i.file_path, "%s", "/index.html");
-        }
-        if (access(req_i.file_path, F_OK) != 0) {
-            send_error(*client_socket, 404);
-            return NULL;
-        }
-        send_ok(*client_socket, req_i.file_path); // TODO: handle other mime types
+    if (parse_request(buff, ret, &req_i) < 0) {
+        log_error("Error parsing request"); 
+        return NULL; 
     }
-    // TODO: hashmap info = parse_request(*buff)
+    switch (req_i.type) {
+        case GET:
+            handle_get_request(client_sock, req_i);
+            break;
+        case PUT:
+            break;
+        case POST:
+            break;
+    }
     return NULL;
 }
 

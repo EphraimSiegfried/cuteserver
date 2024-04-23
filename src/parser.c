@@ -2,29 +2,36 @@
 #include "parser.h"
 #include "log.h"
 
-void *parse_request(char *buff, int buf_length, request_info * req_i) {
-    log_debug("parsing");
+
+int parse_request(char *buff, int buf_length, request_info * req_i) {
     int request_line_indices[3];
     int index = 0;
+    log_debug("parse request");
     //TODO: error handling for reading from buffer
     for (int i = 0; i < buf_length; i++) {
         if (buff[i] == ' ') { //TODO: refactor
+            buff[i] = '\0';
             request_line_indices[index] = i;
             index++;
         }
         if (buff[i] == '\r') {
+            buff[i] = '\0';
             request_line_indices[index] = i;
             break;
         }
     }
-    log_debug("yooo: %d, %d, %d", request_line_indices[0], request_line_indices[1], request_line_indices[2]);
-    log_info("%*.*s", request_line_indices[2], request_line_indices[2], buff);
-    strncpy(req_i->type, &buff[0], buff[request_line_indices[0]]); 
-    int file_path_len = request_line_indices[1] - request_line_indices[0] - 1;
-    log_debug("filepath lenght: %d", file_path_len);
-    strncpy(req_i->file_path, &buff[request_line_indices[0] + 1], file_path_len); 
-    // strncpy(req_i->rest, &buff[request_line_indices[1] + 1], buff[buf_length] - buff[request_line_indices[1] - 1]); 
-    log_debug("REQ: %s", req_i->type); 
-    log_debug("FILEPATH: %s", req_i->file_path); 
-    return 0;
+    strcpy(req_i->file_path, &buff[request_line_indices[0] + 1]); 
+    strcpy(req_i->version, &buff[request_line_indices[1] + 1]); 
+    log_info("%s %s %s", &buff[0], req_i->file_path, req_i->version);
+    //TODO rest of buffer
+    if (strcmp(&buff[0], "GET") == 0) {
+        req_i->type = GET;
+    } else if (strcmp(&buff[0], "PUT") == 0) {
+        req_i->type = PUT;
+    } else if (strcmp(&buff[0], "POST") == 0) {
+        req_i->type = POST;
+    } else {
+        return -1; 
+    }
+    return 1;
 }
