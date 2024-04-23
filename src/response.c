@@ -27,6 +27,9 @@ struct {
         {"tar", "image/tar"},
         {"htm", "text/html"},
         {"html", "text/html"},
+        {"ico", "image/x-icon"},
+        {"css", "text/css"},
+        {"js", "text/javascript"},
         {0, 0}};
 
 char *get_mime_type(char *file_path) {
