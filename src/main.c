@@ -1,4 +1,6 @@
-#include "log.h"
+#include "../deps/log/log.h"
+#include "parser.h"
+#include "request.h"
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -7,8 +9,6 @@
 #include <sys/errno.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "parser.h"
-#include "request.h"
 
 #define MAX_BUF_SIZE 8122
 #define MAX_PENDING 21
@@ -19,8 +19,8 @@ void *serve(void *client_sock) {
     int ret = read(*client_socket, buff, sizeof(buff));
     request_info req_i;
     if (parse_request(buff, ret, &req_i) < 0) {
-        log_error("Error parsing request"); 
-        return NULL; 
+        log_error("Error parsing request");
+        return NULL;
     }
     switch (req_i.type) {
         case GET:
@@ -36,8 +36,7 @@ void *serve(void *client_sock) {
 
 int main(int argv, char *args[]) {
 
-    int port = argv <= 1 ? 8888: atoi(args[1]);
-    log_info("%d", port);
+    int port = argv <= 1 ? 8888 : atoi(args[1]);
 
     if (chroot("./data") < 0) {
         log_error("Chroot error: %s", strerror(errno));

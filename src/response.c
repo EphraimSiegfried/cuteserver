@@ -1,4 +1,4 @@
-#include "log.h"
+#include "../deps/log/log.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 
-#define BUFFER_LEN 65536
+#define BUFFER_LEN 80000
 
 #define ERROR 42
 #define LOG 44
@@ -67,28 +67,17 @@ int send_ok(int socket_fd, char *file_path) {
     return 1;
 }
 
-int send_error(int socket_fd, int type) {
-    char response[BUFFER_LEN];
-    char message[BUFFER_LEN];
-    char err_name[BUFFER_LEN];
-    char content[BUFFER_LEN];
-    int content_len;//TODO
-    switch (type) {
-        case FORBIDDEN:
-            sprintf(err_name, "Forbidden");
-            sprintf(message, "The requested URL, file type or operation is not allowed on this simple static file webserver.");
-            break;
-        case NOTFOUND:
-            sprintf(err_name, "Not Found");
-            sprintf(message, "The requested URL was not found on this server.");
-            break;
-    }
-    sprintf(content, "\n\n<html><head>\n<title>%d %s</title>\n</head><body>\n<h1>%s</h1>\n%s\n</body></html>\n", type, err_name, err_name, message);
+int send_error(int socket_fd, short unsigned int type) {
+    char response[102 + 2 + 79];
+    char content[102];
+    short unsigned int content_len;//TODO
+    sprintf(content, "\n\n<html><head>\n<title>Error %hu</title>\n</head><body>\n<img src=https://http.cat/%hu /></body></html>\n", type, type);
     content_len = strlen(content);
-    sprintf(response, "HTTP/1.1 %d %s\nContenti-Length: %d\nConnection: close\nContent-Type: text/html\n\n%s", type, err_name, content_len, content);
+    log_debug("%hu", content_len);
+    sprintf(response, "HTTP/1.1 %hu\nContent-Length: %hu\nConnection: close\nContent-Type: text/html\n\n%s", type, content_len, content);
     long response_len = strlen(response);
     write(socket_fd, response, response_len);
-    log_error("Sending error: %s %d", err_name, type);
+    log_error("Sending error: %d", type);
 
     sleep(1);// allow socket to drain before signalling the socket is closed
     close(socket_fd);
