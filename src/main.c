@@ -1,6 +1,7 @@
 #include "../deps/log/log.h"
 #include "parser.h"
 #include "request.h"
+#include "response.h"
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -16,21 +17,35 @@
 void *serve(void *client_sock) {
     int *client_socket = client_sock;
     char buff[MAX_BUF_SIZE];
-    int ret = read(*client_socket, buff, sizeof(buff));
-    request_info req_i;
-    if (parse_request(buff, ret, &req_i) < 0) {
-        log_error("Error parsing request");
-        return NULL;
-    }
-    switch (req_i.type) {
-        case GET:
-            handle_get_request(client_sock, req_i);
-            break;
-        case PUT:
-            break;
-        case POST:
-            break;
-    }
+    const char *connection;
+    int recvd_bytes, rl_end;
+    do {
+        if ((recvd_bytes = read(*client_socket, buff, sizeof(buff))) < 0) {
+            log_fatal("Error reading: ", strerror(errno));
+            return NULL;
+        };
+        request_info req_i;
+        if ((rl_end = parse_request_line(buff, recvd_bytes, &req_i)) < 0) {
+            send_error(*client_socket, BADREQUEST);
+            return NULL;
+        }
+        parse_headers(buff + rl_end, &req_i);
+        log_debug("%s", sc_map_get_str(&req_i.headers, "Connection"));
+        switch (req_i.type) {
+            case GET:
+                handle_get_request(client_sock, req_i);
+                break;
+            case PUT:
+                break;
+            case POST:
+                break;
+        }
+        if ((connection = sc_map_get_str(&req_i.headers, "Connection")) == 0) {
+            connection = "close";
+        }
+
+    } while (strcmp(connection, "keep-alive") == 0);
+    log_debug("saying bye");
     return NULL;
 }
 

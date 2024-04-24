@@ -8,10 +8,6 @@
 
 #define BUFFER_LEN 80000
 
-#define ERROR 42
-#define LOG 44
-#define FORBIDDEN 403
-#define NOTFOUND 404
 
 struct {
     char *ext;
@@ -51,9 +47,9 @@ int send_ok(int socket_fd, char *file_path) {
         log_fatal("Error opening %s: %s", file_path, strerror(errno));
         return -1;
     }
-    file_len = (long) lseek(file_fd, (off_t) 0, SEEK_END);                                                           // lseek to the file end to find the length of the file
-    lseek(file_fd, (off_t) 0, SEEK_SET);                                                                             // seek back to the file start ready for reading
-    sprintf(buffer, "HTTP/1.1 200 OK\nContent-Length: %ld\nConnection: close\nContent-Type: %s\n\n", file_len, mime);// Header + a blank line
+    file_len = (long) lseek(file_fd, (off_t) 0, SEEK_END);                                                                // lseek to the file end to find the length of the file
+    lseek(file_fd, (off_t) 0, SEEK_SET);                                                                                  // seek back to the file start ready for reading
+    sprintf(buffer, "HTTP/1.1 200 OK\nContent-Length: %ld\nConnection: keep-alive\nContent-Type: %s\n\n", file_len, mime);// Header + a blank line
     write(socket_fd, buffer, strlen(buffer));
 
     /* send file in 8KB block - last block may be smaller */
@@ -68,12 +64,11 @@ int send_ok(int socket_fd, char *file_path) {
 }
 
 int send_error(int socket_fd, short unsigned int type) {
-    char response[102 + 2 + 79];
     char content[102];
+    char response[102 + 2 + 79];
     short unsigned int content_len;//TODO
     sprintf(content, "\n\n<html><head>\n<title>Error %hu</title>\n</head><body>\n<img src=https://http.cat/%hu /></body></html>\n", type, type);
     content_len = strlen(content);
-    log_debug("%hu", content_len);
     sprintf(response, "HTTP/1.1 %hu\nContent-Length: %hu\nConnection: close\nContent-Type: text/html\n\n%s", type, content_len, content);
     long response_len = strlen(response);
     write(socket_fd, response, response_len);
