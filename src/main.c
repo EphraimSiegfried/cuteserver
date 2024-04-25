@@ -19,40 +19,51 @@ void *serve(void *client_sock) {
     char buff[MAX_BUF_SIZE];
     const char *connection;
     int recvd_bytes, rl_len, hdr_len;
+    bool keep_alive = true;
+
     do {
         memset(buff, 0, sizeof(buff));
         request_info req_i = {0};
+
         if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) <= 0) {
             log_error("%s", strerror(errno));
             break;
-        };
-        rl_len = parse_request_line(buff, recvd_bytes, &req_i);
-        hdr_len = parse_headers(buff + rl_len, &req_i);
-        if (rl_len < 0 || hdr_len < 0) {
+        }
+
+        if ((rl_len = parse_request_line(buff, recvd_bytes, &req_i)) < 0) {
             send_error(*client_socket, BADREQUEST);
             break;
         }
+
+        if ((hdr_len = parse_headers(buff + rl_len, &req_i)) < 0) {
+            send_error(*client_socket, BADREQUEST);
+            break;
+        }
+
         if (strcmp(req_i.version, "HTTP/1.1") != 0) {
             log_error("Not supported:", req_i.version);
             send_error(*client_socket, VERSIONNOTSUPPORTED);
             break;
         }
+
         switch (req_i.type) {
             case GET:
                 handle_get_request(client_sock, req_i);
                 break;
             case PUT:
-                break;
             case POST:
+                // Handle other types as necessary
                 break;
         }
+
         connection = sc_map_get_str(&req_i.headers, "Connection");
-        if (!connection) {
-            connection = "close";
+        if (connection && strcasecmp(connection, "keep-alive") != 0) {
+            keep_alive = false;
         }
         log_debug("Client sent: %s", connection);
 
-    } while (strcasecmp(connection, "keep-alive") == 0);
+    } while (keep_alive);
+
     close(*client_socket);
     return NULL;
 }
@@ -93,11 +104,7 @@ int main(int argv, char *args[]) {
         unsigned int client_addr_len = sizeof(client_addr);
         int client_sock;
         client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &client_addr_len);
-        if (client_sock < 0) {
-            log_error("Error accepting: %s", strerror(errno));
-            continue;
-        }
-
+        int optval = 1;
         log_info("New connection accepted from %s:%d", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
         if (client_sock < 0) {
