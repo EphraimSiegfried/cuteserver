@@ -12,8 +12,8 @@ enum req_type {
 
 typedef struct {
     enum req_type type;
-    char file_path[TODO_SIZE];
-    char version[TODO_SIZE];
+    char *file_path;
+    char *version;
     struct sc_map_str headers;
 } request_info;
 

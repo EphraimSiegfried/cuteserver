@@ -1,3 +1,5 @@
+#include "request.h"
+#include "../deps/log/log.h"
 #include "parser.h"
 #include "response.h"
 #include <stdio.h>
@@ -9,7 +11,8 @@ int handle_get_request(int *sock, request_info req_i) {
         sprintf(req_i.file_path, "%s", "/index.html");
     }
     if (access(req_i.file_path, F_OK) != 0) {
-        send_error(*sock, 404);
+        log_error("File not found: ", req_i.file_path);
+        send_error(*sock, NOTFOUND);
         return -1;
     }
     send_ok(*sock, req_i.file_path);// TODO: handle other mime types

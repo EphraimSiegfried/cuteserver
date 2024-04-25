@@ -18,21 +18,25 @@ void *serve(void *client_sock) {
     int *client_socket = client_sock;
     char buff[MAX_BUF_SIZE];
     const char *connection;
-    int recvd_bytes, rl_end;
+    int recvd_bytes, rl_len, hdr_len;
     do {
         memset(buff, 0, sizeof(buff));
         request_info req_i = {0};
-        log_debug("%d", *client_socket);
-
-        if ((recvd_bytes = read(*client_socket, buff, sizeof(buff))) < 0) {
-            log_fatal("Error reading: ", strerror(errno));
+        if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) <= 0) {
+            log_error("%s", strerror(errno));
             break;
         };
-        if ((rl_end = parse_request_line(buff, recvd_bytes, &req_i)) < 0) {
+        rl_len = parse_request_line(buff, recvd_bytes, &req_i);
+        hdr_len = parse_headers(buff + rl_len, &req_i);
+        if (rl_len < 0 || hdr_len < 0) {
             send_error(*client_socket, BADREQUEST);
             break;
         }
-        parse_headers(buff + rl_end, &req_i);
+        if (strcmp(req_i.version, "HTTP/1.1") != 0) {
+            log_error("Not supported:", req_i.version);
+            send_error(*client_socket, VERSIONNOTSUPPORTED);
+            break;
+        }
         switch (req_i.type) {
             case GET:
                 handle_get_request(client_sock, req_i);
@@ -49,7 +53,6 @@ void *serve(void *client_sock) {
         log_debug("Client sent: %s", connection);
 
     } while (strcasecmp(connection, "keep-alive") == 0);
-    log_debug("saying bye");
     close(*client_socket);
     return NULL;
 }
@@ -89,8 +92,11 @@ int main(int argv, char *args[]) {
         struct sockaddr_in client_addr;
         unsigned int client_addr_len = sizeof(client_addr);
         int client_sock;
-        client_sock =
-                accept(server_sock, (struct sockaddr *) &client_addr, &client_addr_len);
+        client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &client_addr_len);
+        if (client_sock < 0) {
+            log_error("Error accepting: %s", strerror(errno));
+            continue;
+        }
 
         log_info("New connection accepted from %s:%d", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 

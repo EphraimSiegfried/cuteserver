@@ -10,9 +10,9 @@ int parse_headers(char *buf, request_info *req_i) {
     sc_map_init_str(&map, 0, 0);
     char *temp_buf = buf;
     char *line;
-    while ((line = strsep(&temp_buf, "\n")) != NULL) {//TODO: find better implementation
+    while ((line = strsep(&temp_buf, "\n"))) {//TODO: find better implementation
         if (strcmp(line, "") == 0 || strcmp(line, " ") == 0 || strcmp(line, "\r") == 0) continue;
-        if (((key = strtok(line, ": ")) == NULL) || ((value = trim(strtok(NULL, ": "))) == NULL)) return -1;
+        if (!(key = strtok(line, ": ")) || !(value = trim(strtok(NULL, ": ")))) return -1;
         sc_map_put_str(&map, key, value);
     }
     req_i->headers = map;
@@ -23,26 +23,16 @@ int parse_headers(char *buf, request_info *req_i) {
 }
 
 int parse_request_line(char *buff, int buf_length, request_info *req_i) {
-    int request_line_indices[3];
-    int index = 0;
-    //TODO: error handling for reading from buffer
-    for (int i = 0; i < buf_length; i++) {
-        if (buff[i] == ' ') {//TODO: refactor
-            buff[i] = '\0';
-            request_line_indices[index] = i;
-            index++;
-        }
-        if (buff[i] == '\r') {
-            buff[i] = '\0';
-            request_line_indices[index] = i;
-            break;
-        }
-    }
-    strcpy(req_i->file_path, &buff[request_line_indices[0] + 1]);
-    strcpy(req_i->version, &buff[request_line_indices[1] + 1]);
-    log_info("%s %s %s", &buff[0], req_i->file_path, req_i->version);
-    //TODO rest of buffer
-    if (strcmp(&buff[0], "GET") == 0) {
+    char *original_buff = buff;
+
+    char *typ = trim(strsep(&buff, " "));
+    req_i->file_path = trim(strsep(&buff, " "));
+    req_i->version = trim(strsep(&buff, "\n"));
+
+    if (!typ || !req_i->file_path || !req_i->version) return -1;
+    log_info("%s %s %s", typ, req_i->file_path, req_i->version);
+
+    if (strcmp(typ, "GET") == 0) {
         req_i->type = GET;
     } else if (strcmp(&buff[0], "PUT") == 0) {
         req_i->type = PUT;
@@ -51,5 +41,5 @@ int parse_request_line(char *buff, int buf_length, request_info *req_i) {
     } else {
         return -1;
     }
-    return request_line_indices[2] + 2;
+    return buff - original_buff;//TODO: return error if this number is too big
 }

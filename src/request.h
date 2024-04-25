@@ -9,6 +9,7 @@
 #define BADREQUEST 400
 #define FORBIDDEN 403
 #define NOTFOUND 404
+#define VERSIONNOTSUPPORTED 505
 
 int handle_get_request(int *sock, request_info req_i);
 
