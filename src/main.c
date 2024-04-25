@@ -19,10 +19,10 @@ void *serve(void *client_sock) {
     char buff[MAX_BUF_SIZE];
     const char *connection;
     int recvd_bytes, rl_end;
-    request_info req_i;
     do {
         memset(buff, 0, sizeof(buff));
         request_info req_i = {0};
+        log_debug("%d", *client_socket);
 
         if ((recvd_bytes = read(*client_socket, buff, sizeof(buff))) < 0) {
             log_fatal("Error reading: ", strerror(errno));
@@ -33,7 +33,6 @@ void *serve(void *client_sock) {
             break;
         }
         parse_headers(buff + rl_end, &req_i);
-        log_debug("%s", sc_map_get_str(&req_i.headers, "Connection"));
         switch (req_i.type) {
             case GET:
                 handle_get_request(client_sock, req_i);
@@ -43,11 +42,13 @@ void *serve(void *client_sock) {
             case POST:
                 break;
         }
-        if ((connection = sc_map_get_str(&req_i.headers, "Connection")) == NULL) {
+        connection = sc_map_get_str(&req_i.headers, "Connection");
+        if (!connection) {
             connection = "close";
         }
+        log_debug("Client sent: %s", connection);
 
-    } while (strcmp(connection, "keep-alive") == 0);
+    } while (strcasecmp(connection, "keep-alive") == 0);
     log_debug("saying bye");
     close(*client_socket);
     return NULL;
