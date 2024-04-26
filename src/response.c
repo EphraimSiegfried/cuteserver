@@ -47,16 +47,16 @@ int send_ok(int socket_fd, char *file_path) {
         log_fatal("Error opening %s: %s", file_path, strerror(errno));
         return -1;
     }
-    file_len = (long) lseek(file_fd, (off_t) 0, SEEK_END);                                        // lseek to the file end to find the length of the file
-    lseek(file_fd, (off_t) 0, SEEK_SET);                                                          // seek back to the file start ready for reading
-    sprintf(buffer, "HTTP/1.1 200 OK\nContent-Length: %ld\nContent-Type: %s\n\n", file_len, mime);// Header + a blank line
+    file_len = (long) lseek(file_fd, (off_t) 0, SEEK_END);                                                                // lseek to the file end to find the length of the file
+    lseek(file_fd, (off_t) 0, SEEK_SET);                                                                                  // seek back to the file start ready for reading
+    sprintf(buffer, "HTTP/1.1 200 OK\nConnection: keep-alive\nContent-Length: %ld\nContent-Type: %s\n\n", file_len, mime);// Header + a blank line
     write(socket_fd, buffer, strlen(buffer));
 
     /* send file in 8KB block - last block may be smaller */
     while ((num_bytes = read(file_fd, buffer, BUFFER_LEN)) > 0) {
         write(socket_fd, buffer, num_bytes);
     }
-    log_info("Sending %s", file_path);
+    log_info("Sending %s over socket: %d", file_path, socket_fd);
     sleep(1);// allow socket to drain before signalling the socket is closed
     close(file_fd);
     close(socket_fd);

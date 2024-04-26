@@ -8,6 +8,8 @@
 #include <string.h>
 #include <sys/errno.h>
 #include <sys/socket.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #define MAX_BUF_SIZE 8122
@@ -23,7 +25,14 @@ void serve(void *client_sock) {
     do {
         memset(buff, 0, sizeof(buff));
         request_info req_i = {0};
-        log_debug("sock: %d", *client_socket);
+        log_debug("TID: %d sock: %d", syscall(__NR_gettid), *client_socket);
+        log_debug(buff);
+
+        if (error != 0) {
+            /* socket has a non zero error status */
+            fprintf(stderr, "socket error: %s\n", strerror(error));
+        }
+
 
         if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) <= 0) {
             log_error("%s %d", strerror(errno), *client_socket);
@@ -46,6 +55,12 @@ void serve(void *client_sock) {
             break;
         }
 
+        connection = sc_map_get_str(&req_i.headers, "Connection");
+        if (connection && strcasecmp(connection, "keep-alive") != 0) {
+            keep_alive = false;
+        }
+        log_debug("Client sent: %s", connection);
+
         switch (req_i.type) {
             case GET:
                 handle_get_request(client_sock, req_i);
@@ -55,12 +70,6 @@ void serve(void *client_sock) {
                 break;
         }
 
-        connection = sc_map_get_str(&req_i.headers, "Connection");
-        if (connection && strcasecmp(connection, "keep-alive") != 0) {
-            keep_alive = false;
-        }
-        log_debug("Client sent: %s", connection);
-
     } while (keep_alive);
     log_debug(" bye %d", *client_socket);
     close(*client_socket);
@@ -69,7 +78,9 @@ void serve(void *client_sock) {
 
 int main(int argv, char *args[]) {
 
-    int port = argv <= 1 ? 8888 : atoi(args[1]);
+    int port = args[1] ? atoi(args[1]) : 8888;
+    int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
+    log_set_level(log_level);
 
     if (chroot("./data") < 0) {
         log_error("Chroot error: %s", strerror(errno));
@@ -104,19 +115,19 @@ int main(int argv, char *args[]) {
     while (1) {
         struct sockaddr_in client_addr;
         unsigned int client_addr_len = sizeof(client_addr);
+        int *client_sock = malloc(sizeof(int));
+        // log_debug("%d", thpool_num_threads_working(thpool));
+        *client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &client_addr_len);
 
-        log_debug("%d", thpool_num_threads_working(thpool));
-        int client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &client_addr_len);
-
-
-        if (client_sock < 0) {
+        log_debug("Created sock: %d", *client_sock);
+        if (*client_sock < 0) {
             log_fatal("Accepting Error: %d", strerror(errno));
             exit(EXIT_FAILURE);
         }
         log_info("New connection accepted from %s:%d", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
-        setsockopt(client_sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+        // setsockopt(*client_sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
-        thpool_add_work(thpool, serve, &client_sock);
+        thpool_add_work(thpool, serve, client_sock);
     }
 }
