@@ -57,9 +57,8 @@ int send_ok(int socket_fd, char *file_path) {
         write(socket_fd, buffer, num_bytes);
     }
     log_info("Sending %s over socket: %d", file_path, socket_fd);
-    sleep(1);// allow socket to drain before signalling the socket is closed
+    sleep(1);
     close(file_fd);
-    close(socket_fd);
     return 1;
 }
 
@@ -74,7 +73,6 @@ int send_error(int socket_fd, short unsigned int type) {
     write(socket_fd, response, response_len);
     log_error("Sending error: %d", type);
 
-    sleep(1);// allow socket to drain before signalling the socket is closed
-    close(socket_fd);
+    sleep(1);
     return 1;
 }
