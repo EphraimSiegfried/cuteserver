@@ -28,12 +28,6 @@ void serve(void *client_sock) {
         log_debug("TID: %d sock: %d", syscall(__NR_gettid), *client_socket);
         log_debug(buff);
 
-        if (error != 0) {
-            /* socket has a non zero error status */
-            fprintf(stderr, "socket error: %s\n", strerror(error));
-        }
-
-
         if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) <= 0) {
             log_error("%s %d", strerror(errno), *client_socket);
             break;
