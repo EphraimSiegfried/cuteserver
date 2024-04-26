@@ -7,7 +7,7 @@ PREFIX = /usr/local/bin
 # your project name
 TARGET = cuteserver
 
-CFLAGS = -Ideps -Wall -DLOG_USE_COLOR
+CFLAGS = -Ideps -Wall -DLOG_USE_COLOR  -pthread
 
 # all the source files
 SRC = $(wildcard src/*.c)

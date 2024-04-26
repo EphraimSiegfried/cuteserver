@@ -1,10 +1,9 @@
 #include "../deps/log/log.h"
+#include "../deps/threadpool/thpool.h"
 #include "parser.h"
 #include "request.h"
 #include "response.h"
 #include <arpa/inet.h>
-#include <pthread.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/errno.h>
@@ -14,7 +13,7 @@
 #define MAX_BUF_SIZE 8122
 #define MAX_PENDING 21
 
-void *serve(void *client_sock) {
+void serve(void *client_sock) {
     int *client_socket = client_sock;
     char buff[MAX_BUF_SIZE];
     const char *connection;
@@ -24,9 +23,10 @@ void *serve(void *client_sock) {
     do {
         memset(buff, 0, sizeof(buff));
         request_info req_i = {0};
+        log_debug("sock: %d", *client_socket);
 
         if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) <= 0) {
-            log_error("%s", strerror(errno));
+            log_error("%s %d", strerror(errno), *client_socket);
             break;
         }
 
@@ -52,7 +52,6 @@ void *serve(void *client_sock) {
                 break;
             case PUT:
             case POST:
-                // Handle other types as necessary
                 break;
         }
 
@@ -63,9 +62,9 @@ void *serve(void *client_sock) {
         log_debug("Client sent: %s", connection);
 
     } while (keep_alive);
-
+    log_debug(" bye %d", *client_socket);
     close(*client_socket);
-    return NULL;
+    return;
 }
 
 int main(int argv, char *args[]) {
@@ -99,20 +98,25 @@ int main(int argv, char *args[]) {
         exit(EXIT_FAILURE);
     }
 
+    threadpool thpool = thpool_init(8);
+    int optval = 1;
+
     while (1) {
         struct sockaddr_in client_addr;
         unsigned int client_addr_len = sizeof(client_addr);
-        int client_sock;
-        client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &client_addr_len);
-        int optval = 1;
-        log_info("New connection accepted from %s:%d", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+
+        log_debug("%d", thpool_num_threads_working(thpool));
+        int client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &client_addr_len);
+
 
         if (client_sock < 0) {
             log_fatal("Accepting Error: %d", strerror(errno));
             exit(EXIT_FAILURE);
         }
+        log_info("New connection accepted from %s:%d", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
-        pthread_t client_handler;
-        pthread_create(&client_handler, NULL, serve, (void *) &client_sock);
+        setsockopt(client_sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+
+        thpool_add_work(thpool, serve, &client_sock);
     }
 }
