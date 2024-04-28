@@ -1,0 +1,18 @@
+[server]
+    port = 8888
+    workers = 4
+    log-file = "./logs"
+
+[resource.cute]
+    domain = "cute.ch"
+    root = "./data"
+    cgi_bin_dir = "/usr/lib/cgi-bin"
+    [resource.cute.remaps]
+        "clients/hello" = "clients/hello.php"
+
+[resource.popo]
+    domain = "popo.ch"
+    root = "./data"
+    cgi_bin_dir = "/usr/lib/cgi-bin"
+    [resource.popo.remaps]
+        "clients/hello" = "clients/hello.php"
