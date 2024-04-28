@@ -1,5 +1,6 @@
 #include "../deps/log/log.h"
 #include "../deps/threadpool/thpool.h"
+#include "config.h"
 #include "parser.h"
 #include "request.h"
 #include "response.h"
@@ -15,6 +16,7 @@
 #define MAX_BUF_SIZE 8122
 #define MAX_PENDING 21
 
+config conf;
 void serve(void *client_sock) {
     int *client_socket = client_sock;
     char buff[MAX_BUF_SIZE];
@@ -25,7 +27,7 @@ void serve(void *client_sock) {
     do {
         memset(buff, 0, sizeof(buff));
         request_info req_i = {0};
-        log_debug("TID: %d sock: %d", syscall(__NR_gettid), *client_socket);
+        // log_debug("TID: %d sock: %d", syscall(__NR_gettid), *client_socket);
         log_debug(buff);
 
         if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) <= 0) {
@@ -71,9 +73,21 @@ void serve(void *client_sock) {
 }
 
 int main(int argv, char *args[]) {
+    log_debug("hello from the other siiiiiideee");
 
     int port = args[1] ? atoi(args[1]) : 8888;
     int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
+
+    parse_config(&conf, "./config.toml");
+
+    const char *key;
+    const char *value;
+    log_debug("%d", conf.port);
+
+    sc_map_foreach(&conf.resources[0].remaps, key, value) {
+        printf("Key:[%s], Value:[%s] \n", key, value);
+    }
+
     log_set_level(log_level);
 
     if (chroot("./data") < 0) {
@@ -104,7 +118,6 @@ int main(int argv, char *args[]) {
     }
 
     threadpool thpool = thpool_init(8);
-    int optval = 1;
 
     while (1) {
         struct sockaddr_in client_addr;
