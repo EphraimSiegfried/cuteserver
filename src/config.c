@@ -36,8 +36,6 @@ int parse_config(config *conf, char *path) {
     toml_table_t *toml = toml_parse_file(fp, errbuf, sizeof(errbuf));
     fclose(fp);
 
-    log_debug("hi");
-
     if (!toml) {
         log_error("cannot parse - ", errbuf);
     }
@@ -50,23 +48,19 @@ int parse_config(config *conf, char *path) {
 
     toml_table_t *resource = toml_table_in(toml, "resource");
     if (!resource) handle_error("cute resource");
-    log_debug("hi");
 
     // TODO: Dynamic reading of resource tables. ressource table has to be >=1
 
     toml_table_t *cute = toml_table_in(resource, "cute");
     if (!cute) handle_error("cute resource");
-    log_debug("hi");
 
     conf->resources[0].domain = get_str("domain", cute);
-    log_debug("hi");
     conf->resources[0].cgi_bin_dir = get_str("cgi_bin_dir", cute);
-    log_debug("hi");
     // conf->resources[0].root = get_str("root", cute);
     // log_debug("hi");
 
     toml_table_t *remaps = toml_table_in(cute, "remaps");
-    if (!cute) handle_error("cute remaps");
+    if (!remaps) handle_error("cute remaps");
     // conf->resources[0].remaps;
     struct sc_map_str remaps_map;
     sc_map_init_str(&remaps_map, 0, 0);
@@ -76,7 +70,6 @@ int parse_config(config *conf, char *path) {
         sc_map_put_str(&remaps_map, key, toml_string_in(remaps, key).u.s);
     }
     conf->resources[0].remaps = remaps_map;
-    log_debug("hi");
 
     // const char *key;
     // const char *value;

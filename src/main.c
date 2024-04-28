@@ -73,20 +73,10 @@ void serve(void *client_sock) {
 }
 
 int main(int argv, char *args[]) {
-    log_debug("hello from the other siiiiiideee");
+    parse_config(&conf, "./config.toml");// TODO:sanitize config values
 
-    int port = args[1] ? atoi(args[1]) : 8888;
+    int port = conf.port ? conf.port : (args[1] ? atoi(args[1]) : 8888);//TODO: if
     int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
-
-    parse_config(&conf, "./config.toml");
-
-    const char *key;
-    const char *value;
-    log_debug("%d", conf.port);
-
-    sc_map_foreach(&conf.resources[0].remaps, key, value) {
-        printf("Key:[%s], Value:[%s] \n", key, value);
-    }
 
     log_set_level(log_level);
 
