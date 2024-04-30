@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 int handle_get_request(int *sock, request_info req_i) {
+    log_debug("FILE PATH: %s", req_i.file_path);
     if (strlen(req_i.file_path) == 1 && strcmp(req_i.file_path, "/") == 0) {
         sprintf(req_i.file_path, "%s", "/index.html");
     }
@@ -15,6 +16,11 @@ int handle_get_request(int *sock, request_info req_i) {
         send_error(*sock, NOTFOUND);
         return -1;
     }
+    if (strcmp(req_i.file_path + strlen(req_i.file_path) - 3, "cgi") == 0) {
+        //TODO: execute cgi program
+        //TODO: if we check access to file_path but file_path contains query stuff and other things, it automatically fails. ...
+    }
+
     send_ok(*sock, req_i.file_path);// TODO: handle other mime types
     return 1;
 }
