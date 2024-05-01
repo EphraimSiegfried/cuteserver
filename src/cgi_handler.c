@@ -48,47 +48,47 @@ int run_cgi_script(request_info req_i) {
         printf("Pipe error");
         return -1;
     }
-    if (execve("./cgi", arguments, env_variables) < 0) {
-        printf("Error: %s\n", strerror(errno));
+
+    pid_t pid = fork();//create child process
+
+    if (pid == 0) {
+        // Child
+        close(fd[0]);              // Close unused read end
+        dup2(fd[1], STDOUT_FILENO);// Redirect stdout to pipe
+        close(fd[1]);              // Close the original write end of the pipe
+        // Execute command that generates output
+        if (execve("./cgi", arguments, env_variables) < 0) {
+            printf("Error: %s\n", strerror(errno));
+        }
+        // perror("execlp");// Only runs if execlp fails
+        exit(EXIT_FAILURE);
+    } else if (pid > 0) {
+        // This is the parent process
+        char buffer[1024];// Buffer to store output
+        int status;
+        close(fd[1]);// Close unused write end
+
+        // Read the output from the child process
+        ssize_t count = read(fd[0], buffer, sizeof(buffer) - 1);
+        if (count == -1) {
+            perror("read");
+            exit(EXIT_FAILURE);
+        }
+        buffer[count] = '\0';// Null-terminate the string
+
+        // Wait for the child to finish
+        waitpid(pid, &status, 0);
+
+        // Print the output from the child process
+        printf("Output from child: %s\n", buffer);
+        close(fd[0]);// Close the read end
+    } else {
+        printf("Error");
+        return -1;
     }
 
-    // pid_t pid = fork();//create child process
-    //
-    // if (pid == 0) {
-    //     // Child
-    //     close(fd[0]);              // Close unused read end
-    //     dup2(fd[1], STDOUT_FILENO);// Redirect stdout to pipe
-    //     close(fd[1]);              // Close the original write end of the pipe
-    //     // Execute command that generates output
-    //     if (execve("./cgi", arguments, env_variables) < 0) {
-    //         printf("Error: %s\n", strerror(errno));
-    //     }
-    //     // perror("execlp");// Only runs if execlp fails
-    //     exit(EXIT_FAILURE);
-    // } else if (pid > 0) {
-    //     // This is the parent process
-    //     char buffer[1024];// Buffer to store output
-    //     int status;
-    //     close(fd[1]);// Close unused write end
-    //
-    //     // Read the output from the child process
-    //     ssize_t count = read(fd[0], buffer, sizeof(buffer) - 1);
-    //     if (count == -1) {
-    //         perror("read");
-    //         exit(EXIT_FAILURE);
-    //     }
-    //     buffer[count] = '\0';// Null-terminate the string
-    //
-    //     // Wait for the child to finish
-    //     waitpid(pid, &status, 0);
-    //
-    //     // Print the output from the child process
-    //     printf("Output from child: %s\n", buffer);
-    //     close(fd[0]);// Close the read end
-    // } else {
-    //     printf("Error");
-    //     return -1;
-    // }
+    printf("here i am");
+    fflush(stdout);
 
     return 1;
 }
