@@ -8,6 +8,13 @@
 #include <string.h>
 #include <unistd.h>
 
+int handle_cgi_request(int *sock, request_info req_i) {
+    char *buffer;
+    int len = run_cgi_script(req_i, &buffer);
+    send_ok_buf(*sock, buffer, "text/html", len);
+    return 1;
+}
+
 int handle_get_request(int *sock, request_info req_i) {
     log_debug("FILE PATH: %s", req_i.file_path);
     if (strlen(req_i.file_path) == 1 && strcmp(req_i.file_path, "/") == 0) {
@@ -19,28 +26,9 @@ int handle_get_request(int *sock, request_info req_i) {
         return -1;
     }
     if (strcmp(req_i.file_path, "./data/cgi-bin/cgi") == 0) {
-        //TODO: execute cgi program
-        run_cgi_script(req_i);
-        //TODO: if we check access to file_path but file_path contains query stuff and other things, it automatically fails. ...
+        handle_cgi_request(sock, req_i);
     }
 
     send_ok(*sock, req_i.file_path);// TODO: handle other mime types
-    return 1;
-}
-
-int handle_post_request(int *sock, request_info req_i) {
-
-    // find script corresponding to req_i->path
-    // chöme das iwie imne andere file speichere ?
-    // also demet me cha zb imne json (weiss ned ob gschid) path: /gugus -> script: guguscript
-
-
-    // set environment variables for the script
-
-    // execute the script
-
-    // wait for it to finish & read from the standard output of the script
-
-    // compose html message and respond to client
     return 1;
 }

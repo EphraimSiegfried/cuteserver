@@ -41,11 +41,6 @@ void serve(void *client_sock) {
             break;
         }
 
-        // sprintf(req_i.file_path, "%s%s", "./data", req_i.file_path);
-        log_error("after");
-        log_error(req_i.file_path);
-        log_error(req_i.version);
-
         if ((hdr_len = parse_headers(buff + rl_len, &req_i)) < 0) {
             send_error(*client_socket, BADREQUEST);
             break;

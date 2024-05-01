@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/errno.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 
@@ -57,11 +58,19 @@ int send_ok(int socket_fd, char *file_path) {
         write(socket_fd, buffer, num_bytes);
     }
     log_info("Sending %s over socket: %d", file_path, socket_fd);
-    sleep(1);
     close(file_fd);
     return 1;
 }
 
+int send_ok_buf(int socket_fd, char *content_buffer, char *mime, long size) {
+    long num_bytes;
+    char *response_buffer;
+    sprintf(response_buffer, "HTTP/1.1 200 OK\nConnection: keep-alive\nContent-Length: %ld\nContent-Type: %s\n\n%s", size, mime, content_buffer);
+
+    send(socket_fd, response_buffer, num_bytes, NULL);
+    log_info("Sending bufer over socket: %d", socket_fd);
+    return 1;
+}
 int send_error(int socket_fd, short unsigned int type) {
     char content[102];
     char response[102 + 2 + 79];

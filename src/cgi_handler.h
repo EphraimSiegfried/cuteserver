@@ -3,7 +3,7 @@
 
 #include "parser.h"
 
-int run_cgi_script(request_info req_i);
+int run_cgi_script(request_info req_i, char *buffer[]);
 int set_env(char *env_variables[], request_info req_i);
 
 #endif//CGI_HANDLER_H

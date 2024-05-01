@@ -37,9 +37,9 @@ int set_env(char *env_variables[], request_info req_i) {
     return 1;
 }
 
-int run_cgi_script(request_info req_i) {
+int run_cgi_script(request_info req_i, char *buffer[]) {
+    ssize_t count;
     char *arguments[3];
-    char buffer[1024];// Buffer to store output
     arguments[0] = "cgi";
     arguments[1] = "23";
     arguments[2] = NULL;
@@ -76,7 +76,7 @@ int run_cgi_script(request_info req_i) {
         close(fd[1]);// Close unused write end
 
         // Read the output from the child process
-        ssize_t count = read(fd[0], buffer, sizeof(buffer) - 1);
+        count = read(fd[0], buffer, sizeof(buffer) - 1);
         if (count == -1) {
             perror("read");
             exit(EXIT_FAILURE);
@@ -97,5 +97,5 @@ int run_cgi_script(request_info req_i) {
     printf("%s", buffer);
     fflush(stdout);
 
-    return 1;
+    return count;
 }
