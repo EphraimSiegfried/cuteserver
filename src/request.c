@@ -1,7 +1,9 @@
 #include "request.h"
 #include "../deps/log/log.h"
+#include "cgi_handler.h"
 #include "parser.h"
 #include "response.h"
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -16,8 +18,9 @@ int handle_get_request(int *sock, request_info req_i) {
         send_error(*sock, NOTFOUND);
         return -1;
     }
-    if (strcmp(req_i.file_path + strlen(req_i.file_path) - 3, "cgi") == 0) {
+    if (strcmp(req_i.file_path, "/cgi-bin/cgi") == 0) {
         //TODO: execute cgi program
+        run_cgi_script(req_i);
         //TODO: if we check access to file_path but file_path contains query stuff and other things, it automatically fails. ...
     }
 

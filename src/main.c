@@ -76,7 +76,7 @@ int main(int argv, char *args[]) {
     conf = malloc(sizeof(config));      //TODO:free
     parse_config(conf, "./config.toml");// TODO:sanitize config values
 
-    int port = conf->port ? conf->port : (args[1] ? atoi(args[1]) : 8888);//TODO: if
+    int port = args[1] ? atoi(args[1]) : (conf->port ? conf->port : 8888);//TODO: if
     int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
 
     log_set_level(log_level);
