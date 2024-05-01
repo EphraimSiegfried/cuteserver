@@ -26,7 +26,11 @@ int parse_request_line(char *buff, int buf_length, request_info *req_i) {
     char *original_buff = buff;
 
     char *typ = trim(strsep(&buff, " "));
-    req_i->file_path = trim(strsep(&buff, " "));
+
+    char *f_path = malloc(sizeof(char) * 3000);//TODO:FREE!!!!!!!!!!!
+    sprintf(f_path, "./data%s", trim(strsep(&buff, " ")));
+    log_debug("f_path %s", f_path);
+    req_i->file_path = f_path;
     req_i->version = trim(strsep(&buff, "\n"));
 
     if (!typ || !req_i->file_path || !req_i->version) return -1;

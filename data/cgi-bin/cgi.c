@@ -18,14 +18,14 @@ int main() {
     printf("C Program Version\n");
     current_time = time(NULL); /* get current time */
     printf("It is now %s\n", ctime(&current_time));
-    save_env = getenv("QUERY_STRING"); /* get environment variable */
-    env_value = malloc(strlen(save_env) + 1);
-    if (env_value == NULL) {
-        printf("Major failure; please notify the webmaster\n");
-        exit(2);
-    }
-    strcpy(env_value, save_env);            /* save environment variable */
-    printf("The query is %s\n", env_value); /* and print it */
+    // save_env = getenv("QUERY_STRING"); /* get environment variable */
+    // env_value = malloc(strlen(save_env) + 1);
+    // if (env_value == NULL) {
+    //     printf("Major failure; please notify the webmaster\n");
+    //     exit(2);
+    // }
+    // strcpy(env_value, save_env);            /* save environment variable */
+    // printf("The query is %s\n", env_value); /* and print it */
     printf("You are signed onto %s\n", getenv("REMOTE_HOST"));
     printf("Your IP Address is %s\n", getenv("REMOTE_ADDR"));
     printf("</pre> </body> </html>\n");

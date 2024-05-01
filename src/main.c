@@ -5,6 +5,7 @@
 #include "request.h"
 #include "response.h"
 #include <arpa/inet.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/errno.h>
@@ -39,6 +40,11 @@ void serve(void *client_sock) {
             send_error(*client_socket, BADREQUEST);
             break;
         }
+
+        // sprintf(req_i.file_path, "%s%s", "./data", req_i.file_path);
+        log_error("after");
+        log_error(req_i.file_path);
+        log_error(req_i.version);
 
         if ((hdr_len = parse_headers(buff + rl_len, &req_i)) < 0) {
             send_error(*client_socket, BADREQUEST);
@@ -81,8 +87,12 @@ int main(int argv, char *args[]) {
 
     log_set_level(log_level);
 
-    if (chroot("./data") < 0) {
-        log_error("Chroot error: %s", strerror(errno));
+    // if (chroot("./data") < 0) {
+    //     log_error("Chroot error: %s", strerror(errno));
+    // }
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, PATH_MAX)) {
+        printf("\nCWD in main: %s\n", cwd);
     }
     // SERVER SOCKET
     struct sockaddr_in server_addr;

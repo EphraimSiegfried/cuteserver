@@ -18,7 +18,7 @@ int handle_get_request(int *sock, request_info req_i) {
         send_error(*sock, NOTFOUND);
         return -1;
     }
-    if (strcmp(req_i.file_path, "/cgi-bin/cgi") == 0) {
+    if (strcmp(req_i.file_path, "./data/cgi-bin/cgi") == 0) {
         //TODO: execute cgi program
         run_cgi_script(req_i);
         //TODO: if we check access to file_path but file_path contains query stuff and other things, it automatically fails. ...
