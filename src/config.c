@@ -24,7 +24,7 @@ char *get_str(char *field, toml_table_t *tbl) {
 }
 
 
-int parse_config(config *conf, char *path) {
+int parse_config(char *path) {
     FILE *fp;
     char errbuf[200];
 
@@ -55,15 +55,17 @@ int parse_config(config *conf, char *path) {
     if (!cute) handle_error("cute resource");
 
     conf->resources[0].domain = get_str("domain", cute);
+    conf->resources[0].root = get_str("root", cute);
     conf->resources[0].cgi_bin_dir = get_str("cgi_bin_dir", cute);
     // conf->resources[0].root = get_str("root", cute);
-    // log_debug("hi");
 
     toml_table_t *remaps = toml_table_in(cute, "remaps");
     if (!remaps) handle_error("cute remaps");
     // conf->resources[0].remaps;
     struct sc_map_str remaps_map;
     sc_map_init_str(&remaps_map, 0, 0);
+    //add default remapping / to /index.html
+    sc_map_put_str(&remaps_map, "/", "/index.html");
     for (int i = 0;; i++) {
         const char *key = toml_key_in(remaps, i);
         if (!key) break;

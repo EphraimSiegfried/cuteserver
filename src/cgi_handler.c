@@ -17,7 +17,7 @@ int set_env(char *env_variables[], request_info req_i) {
     sprintf(env_variables[3], "SERVER_PROTOCOL=%s", req_i.version);
     env_variables[4] = "SERVER_PORT=8888";// TODO: aus config
     env_variables[5] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[5], "REQUEST_METHOD=%s", REQ_TYPE_STRING[req_i.type]);
+    sprintf(env_variables[5], "REQUEST_METHOD=%s", req_i.req_type);
     env_variables[6] = malloc(ENV_BUF_SIZE);
     sprintf(env_variables[6], "PATH_INFO=%s", req_i.file_path);//TODO: add extra info about path ...
     env_variables[7] = "PATH_TRANSLATED=CGI/1.1";
@@ -60,7 +60,7 @@ int run_cgi_script(request_info req_i, char *cgi_output[]) {
         close(fd[1]);              // Close the original write end of the pipe
         // Execute command that generates output
         // printf("file_path: %s\n", req_i.file_path);
-        if (execve(req_i.file_path, arguments, env_variables) < 0) {
+        if (execve(req_i.real_path, arguments, env_variables) < 0) {
             printf("Error: %s\n", strerror(errno));
         }
         perror("execve");// Only runs if execlp fails

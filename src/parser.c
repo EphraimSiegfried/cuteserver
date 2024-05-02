@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "../deps/hashmap/sc_map.h"
 #include "../deps/log/log.h"
+#include "config.h"
 #include "utils.h"
 #include <string.h>
 
@@ -25,24 +26,27 @@ int parse_headers(char *buf, request_info *req_i) {
 int parse_request_line(char *buff, int buf_length, request_info *req_i) {
     char *original_buff = buff;
 
-    char *typ = trim(strsep(&buff, " "));
-
-    char *f_path = malloc(sizeof(char) * 3000);//TODO:FREE!!!!!!!!!!!
-    sprintf(f_path, "./data%s", trim(strsep(&buff, " ")));
-    req_i->file_path = f_path;
+    req_i->req_type = trim(strsep(&buff, " "));
+    req_i->file_path = trim(strsep(&buff, " "));
+    char *real_path = malloc(sizeof(char) * 1024);
+    const char *mapped_path = sc_map_get_str(&conf->resources[0].remaps, req_i->file_path);
+    sprintf(real_path, "%s%s", conf->resources[0].root, mapped_path ? mapped_path : req_i->file_path);
+    log_debug(real_path);
+    log_debug(req_i->file_path);
+    req_i->real_path = real_path;
     req_i->version = trim(strsep(&buff, "\n"));
 
-    if (!typ || !req_i->file_path || !req_i->version) return -1;
-    log_info("%s %s %s", typ, req_i->file_path, req_i->version);
+    if (!req_i->req_type || !req_i->file_path || !req_i->version) return -1;
+    log_info("%s %s %s", req_i->req_type, req_i->file_path, req_i->version);
 
-    if (strcmp(typ, "GET") == 0) {
-        req_i->type = GET;
-    } else if (strcmp(&buff[0], "PUT") == 0) {
-        req_i->type = PUT;
-    } else if (strcmp(&buff[0], "POST") == 0) {
-        req_i->type = POST;
-    } else {
-        return -1;
-    }
     return buff - original_buff;//TODO: return error if this number is too big
 }
+
+// int resolve_path(request_info *req_i) {
+//     if (req_i->file_path == NULL) return NULL;
+//     char real_path[1024];
+//     strcpy(real_path, conf->resources[0].root);
+//     const char *mapped_path = sc_map_get_str(&conf->resources[0].remaps, req_i->file_path);
+//     if (mapped_path == NULL) return NULL;
+//     strcat(real_path, mapped_path);
+// }

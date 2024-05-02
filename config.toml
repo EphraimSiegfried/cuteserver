@@ -8,11 +8,12 @@
     root = "./data"
     cgi_bin_dir = "/usr/lib/cgi-bin"
     [resource.cute.remaps]
-        "clients/hello" = "clients/hello.php"
+        "/clients/hello" = "clients/hello.php"
+        "/yay" = "/cgi-bin/cgi"
 
 [resource.popo]
     domain = "popo.ch"
     root = "./data"
     cgi_bin_dir = "/usr/lib/cgi-bin"
     [resource.popo.remaps]
-        "clients/hello" = "clients/hello.php"
+        "/yay" = "/cgi-bin/cgi"

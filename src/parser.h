@@ -4,24 +4,10 @@
 #define TODO_SIZE 6342
 #include "../deps/hashmap/sc_map.h"
 
-#define FOREACH_TYPE(TYPE) \
-    TYPE(GET)              \
-    TYPE(POST)             \
-    TYPE(PUT)
-
-#define GENERATE_ENUM(ENUM) ENUM,
-#define GENERATE_STRING(STRING) #STRING,
-
-enum REQ_TYPE {
-    FOREACH_TYPE(GENERATE_ENUM)
-};
-
-static const char *REQ_TYPE_STRING[] = {
-        FOREACH_TYPE(GENERATE_STRING)};
-
 typedef struct {
-    enum REQ_TYPE type;
+    char *req_type;
     char *file_path;
+    char *real_path;
     char *version;
     struct sc_map_str headers;
 } request_info;

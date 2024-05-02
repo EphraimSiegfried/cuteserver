@@ -17,7 +17,6 @@
 #define MAX_BUF_SIZE 8122
 #define MAX_PENDING 21
 
-config *conf;
 void serve(void *client_sock) {
     int *client_socket = client_sock;
     char buff[MAX_BUF_SIZE];
@@ -28,7 +27,6 @@ void serve(void *client_sock) {
     do {
         memset(buff, 0, sizeof(buff));
         request_info req_i = {0};// TODO: create before running this function, add ip to req_i
-        log_debug(buff);
 
         if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) <= 0) {
             log_error("%s %d", strerror(errno), *client_socket);
@@ -39,6 +37,7 @@ void serve(void *client_sock) {
             send_error(*client_socket, BADREQUEST);
             break;
         }
+        log_debug("herererer");
 
         if ((hdr_len = parse_headers(buff + rl_len, &req_i)) < 0) {
             send_error(*client_socket, BADREQUEST);
@@ -46,7 +45,7 @@ void serve(void *client_sock) {
         }
 
         if (strcmp(req_i.version, "HTTP/1.1") != 0) {
-            log_error("Not supported:", req_i.version);
+            log_error("Not supported:%s", req_i.version);
             send_error(*client_socket, VERSIONNOTSUPPORTED);
             break;
         }
@@ -55,16 +54,16 @@ void serve(void *client_sock) {
         if (connection && strcasecmp(connection, "keep-alive") != 0) {
             keep_alive = false;
         }
-        log_debug("Client sent: %s", connection);
+        // log_debug("Client sent: %s", connection);
 
-        switch (req_i.type) {
-            case GET:
-                handle_get_request(client_sock, req_i);
-                break;
-            case PUT:
-                break;
-            case POST:
-                break;
+        if (strcmp(req_i.req_type, "GET") == 0) {
+            handle_get_request(client_socket, req_i);
+        } else if (strcmp(req_i.req_type, "PUT") == 0) {
+            //TODO: implement handle put request
+        } else if (strcmp(req_i.req_type, "POST") == 0) {
+            //TODO: handle_post_request(client_socket, req_i)
+        } else {
+            return;//TODO: send BADREQUEST
         }
 
     } while (keep_alive);
@@ -74,17 +73,14 @@ void serve(void *client_sock) {
 }
 
 int main(int argv, char *args[]) {
-    conf = malloc(sizeof(config));      //TODO:free
-    parse_config(conf, "./config.toml");// TODO:sanitize config values
+    conf = malloc(sizeof(config));//TODO:free
+    parse_config("./config.toml");// TODO:sanitize config values
 
     int port = args[1] ? atoi(args[1]) : (conf->port ? conf->port : 8888);//TODO: if
     int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
 
     log_set_level(log_level);
 
-    // if (chroot("./data") < 0) {
-    //     log_error("Chroot error: %s", strerror(errno));
-    // }
     char cwd[PATH_MAX];
     if (getcwd(cwd, PATH_MAX)) {
         printf("\nCWD in main: %s\n", cwd);

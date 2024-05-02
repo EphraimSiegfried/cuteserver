@@ -17,6 +17,8 @@ typedef struct {
     resource resources[];
 
 } config;
-int parse_config(config *toml_conf, char *path);
+
+config *conf;
+int parse_config(char *path);
 
 #endif//CONFIG_H

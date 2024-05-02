@@ -1,4 +1,6 @@
+#include "response.h"
 #include "../deps/log/log.h"
+#include "parser.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
@@ -82,5 +84,28 @@ int send_error(int socket_fd, short unsigned int type) {
     log_error("Sending error: %d", type);
 
     sleep(1);
+    return 1;
+}
+
+int send_response(int socket_fd, response_info *res_i, char *request_body) {
+    const char *key;
+    const char *value;
+    char response_line[BUFFER_LEN];
+    char *header_line = malloc(sizeof(char) * 100);
+
+    // send request line
+    sprintf(response_line, "%s %d %s\n", res_i->version, res_i->status_code, res_i->status_msg);
+    send(socket_fd, response_line, strlen(response_line), 0);
+
+    // send headers
+    sc_map_foreach(&res_i->headers, key, value) {
+        sprintf(header_line, "%s:%s\n", key, value);
+        send(socket_fd, header_line, strlen(header_line), 0);
+    }
+    send(socket_fd, "\n", 1, 0);
+
+    // send request_body
+    send(socket_fd, request_body, strlen(request_body), 0);
+
     return 1;
 }
