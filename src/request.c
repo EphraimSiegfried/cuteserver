@@ -20,7 +20,6 @@ int handle_cgi_request(int *sock, request_info req_i) {
 }
 
 int handle_get_request(int *sock, request_info req_i) {
-    log_debug("FILE PATH: %s", req_i.file_path);
     if (strlen(req_i.file_path) == 1 && strcmp(req_i.file_path, "/") == 0) {
         sprintf(req_i.file_path, "%s", "/index.html");
     }

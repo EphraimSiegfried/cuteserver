@@ -14,7 +14,6 @@ int parse_headers(char *buf, request_info *req_i) {
         if (strcmp(line, "") == 0 || strcmp(line, " ") == 0 || strcmp(line, "\r") == 0 || strcmp(line, "\r\n") == 0) break;
         if (!(key = strtok(line, ": ")) || !(value = trim(strtok(NULL, ": ")))) return -1;
         sc_map_put_str(&map, key, value);
-        log_debug(value);
     }
     req_i->headers = map;
     // sc_map_foreach(&map, key, value) {
@@ -30,7 +29,6 @@ int parse_request_line(char *buff, int buf_length, request_info *req_i) {
 
     char *f_path = malloc(sizeof(char) * 3000);//TODO:FREE!!!!!!!!!!!
     sprintf(f_path, "./data%s", trim(strsep(&buff, " ")));
-    log_debug("f_path %s", f_path);
     req_i->file_path = f_path;
     req_i->version = trim(strsep(&buff, "\n"));
 
