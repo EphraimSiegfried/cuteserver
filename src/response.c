@@ -62,12 +62,11 @@ int send_ok(int socket_fd, char *file_path) {
     return 1;
 }
 
-int send_ok_buf(int socket_fd, char *content_buffer, char *mime, long size) {
-    long num_bytes;
-    char *response_buffer;
-    sprintf(response_buffer, "HTTP/1.1 200 OK\nConnection: keep-alive\nContent-Length: %ld\nContent-Type: %s\n\n%s", size, mime, content_buffer);
+int send_ok_buf(int socket_fd, char **content_buffer, char *mime, long size) {
+    char response_buffer[BUFFER_LEN];
+    sprintf(response_buffer, "HTTP/1.1 200 OK\nConnection: keep-alive\nContent-Length: %ld\nContent-Type: %s\n\n%s", size, mime, *content_buffer);
 
-    send(socket_fd, response_buffer, num_bytes, NULL);
+    send(socket_fd, response_buffer, strlen(response_buffer), 0);
     log_info("Sending bufer over socket: %d", socket_fd);
     return 1;
 }

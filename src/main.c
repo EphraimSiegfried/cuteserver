@@ -27,8 +27,7 @@ void serve(void *client_sock) {
 
     do {
         memset(buff, 0, sizeof(buff));
-        request_info req_i = {0};
-        // log_debug("TID: %d sock: %d", syscall(__NR_gettid), *client_socket);
+        request_info req_i = {0};// TODO: create before running this function, add ip to req_i
         log_debug(buff);
 
         if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) <= 0) {
@@ -63,6 +62,7 @@ void serve(void *client_sock) {
                 handle_get_request(client_sock, req_i);
                 break;
             case PUT:
+                break;
             case POST:
                 break;
         }

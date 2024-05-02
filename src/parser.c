@@ -11,15 +11,16 @@ int parse_headers(char *buf, request_info *req_i) {
     char *temp_buf = buf;
     char *line;
     while ((line = strsep(&temp_buf, "\n"))) {//TODO: find better implementation
-        if (strcmp(line, "") == 0 || strcmp(line, " ") == 0 || strcmp(line, "\r") == 0) continue;
+        if (strcmp(line, "") == 0 || strcmp(line, " ") == 0 || strcmp(line, "\r") == 0 || strcmp(line, "\r\n") == 0) break;
         if (!(key = strtok(line, ": ")) || !(value = trim(strtok(NULL, ": ")))) return -1;
         sc_map_put_str(&map, key, value);
+        log_debug(value);
     }
     req_i->headers = map;
     // sc_map_foreach(&map, key, value) {
     //     log_debug("KEY: [%s] | VALUE: [%s]", key, value);
     // }
-    return 1;
+    return temp_buf - buf;
 }
 
 int parse_request_line(char *buff, int buf_length, request_info *req_i) {

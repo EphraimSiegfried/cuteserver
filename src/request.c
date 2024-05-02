@@ -9,9 +9,13 @@
 #include <unistd.h>
 
 int handle_cgi_request(int *sock, request_info req_i) {
-    char *buffer;
-    int len = run_cgi_script(req_i, &buffer);
-    send_ok_buf(*sock, buffer, "text/html", len);
+    char *cgi_output = malloc(sizeof(char) * 5000);
+    if (cgi_output == NULL) return -1;
+    int cgi_output_len = run_cgi_script(req_i, &cgi_output);
+    int hdr_len = parse_headers(cgi_output, &req_i);
+    char *content = cgi_output + hdr_len;
+    send_ok_buf(*sock, &content, "text/html", cgi_output_len - hdr_len);
+    free(cgi_output);
     return 1;
 }
 
