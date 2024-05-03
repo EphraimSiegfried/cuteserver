@@ -10,8 +10,8 @@
 #define ENV_BUF_SIZE 100
 
 int set_env(char *env_variables[], request_info *req_i) {
-    const char *key;
-    const char *value;
+    // const char *key;
+    // const char *value;
     env_variables[0] = "SERVER_SOFTWARE=cuteserver/0.1";
     env_variables[1] = "SERVER_NAME=localhost";// TODO: aus config
     env_variables[2] = "GATEWAY_INTERFACE=CGI/1.1";
