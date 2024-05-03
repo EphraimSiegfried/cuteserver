@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 void handle_error(char *missing_field) {
     log_error("Missing %s", missing_field);
     exit(1);
@@ -48,6 +47,11 @@ int parse_config(char *path) {
 
     toml_table_t *resource = toml_table_in(toml, "resource");
     if (!resource) handle_error("cute resource");
+
+    int num_resources = 1;// Assuming at least one resource for now
+
+    // Allocate memory for the resources array
+    conf->resources = malloc(num_resources * 2000);//TODO: free
 
     // TODO: Dynamic reading of resource tables. ressource table has to be >=1
 

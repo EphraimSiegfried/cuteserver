@@ -28,7 +28,7 @@ int handle_cgi_request(int *sock, request_info *req_i) {
     char str[20];
     sprintf(str, "%d", cgi_output_len - hdr_len);
     sc_map_put_str(&response_i.headers, "Content-Length", str);
-    sc_map_put_str(&response_i.headers, "Content-Type", "text/html");
+    sc_map_put_str(&response_i.headers, "Content-Type", "text/html"); //TODO: check memory allocation
     sc_map_put_str(&response_i.headers, "Connection", "keep-alive");
     send_response(*sock, &response_i, content);
 

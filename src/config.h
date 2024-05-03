@@ -14,8 +14,7 @@ typedef struct {
 typedef struct {
     int workers;
     int port;
-    resource resources[];
-
+    resource *resources;
 } config;
 
 extern config *conf;
