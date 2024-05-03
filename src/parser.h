@@ -7,6 +7,7 @@
 typedef struct {
     char *req_type;
     char *file_path;
+    char *query;
     char *real_path;
     char *version;
     struct sc_map_str headers;

@@ -18,7 +18,7 @@ int parse_headers(char *buf, request_info *req_i) {
     }
     req_i->headers = map;
     // sc_map_foreach(&map, key, value) {
-    //     log_debug("KEY: [%s] | VALUE: [%s]", key, value);
+    //     log_debug("KEY: [%s] | VALUE: [%s]", jey, value);
     // }
     return temp_buf - buf;
 }
@@ -27,13 +27,19 @@ int parse_request_line(char *buff, int buf_length, request_info *req_i) {
     char *original_buff = buff;
 
     req_i->req_type = trim(strsep(&buff, " "));
-    req_i->file_path = trim(strsep(&buff, " "));
+    char *url = trim(strsep(&buff, " "));
+    log_debug("URL:%s", url);
+    req_i->file_path = trim(strsep(&url, "?"));
+    req_i->query = strsep(&url, " ");//kei whitespace...
+    log_debug("FILE_PATH: %s", req_i->file_path);
+    log_debug("QUERY: %s", req_i->query);
+
+    //resolve real path
     char *real_path = malloc(sizeof(char) * 1024);
     const char *mapped_path = sc_map_get_str(&conf->resources[0].remaps, req_i->file_path);
-    sprintf(real_path, "%s%s", conf->resources[0].root, mapped_path ? mapped_path : req_i->file_path);
-    log_debug(real_path);
-    log_debug(req_i->file_path);
+    sprintf(real_path, "%s%s", conf->resources[0].root, mapped_path ? mapped_path : req_i->file_path);//TODO: what if query is in file path
     req_i->real_path = real_path;
+
     req_i->version = trim(strsep(&buff, "\n"));
 
     if (!req_i->req_type || !req_i->file_path || !req_i->version) return -1;

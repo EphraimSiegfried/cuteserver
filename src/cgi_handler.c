@@ -9,28 +9,35 @@
 
 #define ENV_BUF_SIZE 100
 
-int set_env(char *env_variables[], request_info req_i) {
+int set_env(char *env_variables[], request_info *req_i) {
+    const char *key;
+    const char *value;
     env_variables[0] = "SERVER_SOFTWARE=cuteserver/0.1";
     env_variables[1] = "SERVER_NAME=localhost";// TODO: aus config
     env_variables[2] = "GATEWAY_INTERFACE=CGI/1.1";
     env_variables[3] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[3], "SERVER_PROTOCOL=%s", req_i.version);
+    sprintf(env_variables[3], "SERVER_PROTOCOL=%s", req_i->version);
     env_variables[4] = "SERVER_PORT=8888";// TODO: aus config
     env_variables[5] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[5], "REQUEST_METHOD=%s", req_i.req_type);
+    sprintf(env_variables[5], "REQUEST_METHOD=%s", req_i->req_type);
     env_variables[6] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[6], "PATH_INFO=%s", req_i.file_path);//TODO: add extra info about path ...
-    env_variables[7] = "PATH_TRANSLATED=CGI/1.1";
+    sprintf(env_variables[6], "PATH_INFO=%s", req_i->file_path);
+    env_variables[7] = malloc(ENV_BUF_SIZE);
+    sprintf(env_variables[7], "PATH_TRANSLATED=%s", req_i->real_path);
     env_variables[8] = "SCRIPT_NAME=CGI/1.1";
     env_variables[9] = "QUERY_STRING=";//TODO: for get methods decode query string
     env_variables[10] = "REMOTE_HOST=cuteserver";
     env_variables[11] = "REMOTE_ADDR=localhost";//TODO:
-    env_variables[12] = "AUTH_TYPE=CGI/1.1";
-    env_variables[13] = "REMOTE_USER=CGI/1.1";
-    env_variables[14] = "REMOTE_IDENT=CGI/1.1";
+    env_variables[12] = "AUTH_TYPE=NULL";
+    env_variables[13] = "REMOTE_USER=NULL";
+    env_variables[14] = "REMOTE_IDENT=NULL";
     env_variables[15] = "CONTENT_TYPE=CGI/1.1";
     env_variables[16] = "CONTENT_LENGTH=CGI/1.1";
-
+    // size_t i = 17;
+    // uint32_t size = sc_map_size_str(&req_i->headers);
+    // sc_map_foreach(&req_i->headers, key, value) {
+    //     sprintf(env_variables[i++], "HTTP_%s=%s", key, value);
+    // }
     return 1;
 }
 
@@ -42,7 +49,7 @@ int run_cgi_script(request_info req_i, char *cgi_output[]) {
     arguments[2] = NULL;
 
     char *env_variables[17];
-    set_env(env_variables, req_i);
+    set_env(env_variables, &req_i);
 
     int fd[2];//2 file descriptors, one for read, one for write
     if (pipe(fd) < 0) {
