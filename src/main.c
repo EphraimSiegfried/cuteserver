@@ -17,6 +17,7 @@
 #define MAX_BUF_SIZE 8122
 #define MAX_PENDING 21
 
+config *conf = NULL;
 void serve(void *client_sock) {
     int *client_socket = client_sock;
     char buff[MAX_BUF_SIZE];
@@ -26,41 +27,43 @@ void serve(void *client_sock) {
 
     do {
         memset(buff, 0, sizeof(buff));
-        request_info req_i = {0};// TODO: create before running this function, add ip to req_i
+        request_info req_info = {0};
+        request_info *req_i = &req_info;
+
 
         if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) <= 0) {
             log_error("%s %d", strerror(errno), *client_socket);
             break;
         }
 
-        if ((rl_len = parse_request_line(buff, recvd_bytes, &req_i)) < 0) {
+        if ((rl_len = parse_request_line(buff, recvd_bytes, req_i)) < 0) {
             send_error(*client_socket, BADREQUEST);
             break;
         }
-        log_debug("herererer");
+        log_info("Main:%s %s %s %s", req_i->req_type, req_i->file_path, req_i->version, req_i->real_path);
 
-        if ((hdr_len = parse_headers(buff + rl_len, &req_i)) < 0) {
+        if ((hdr_len = parse_headers(buff + rl_len, req_i)) < 0) {
             send_error(*client_socket, BADREQUEST);
             break;
         }
 
-        if (strcmp(req_i.version, "HTTP/1.1") != 0) {
-            log_error("Not supported:%s", req_i.version);
+        if (strcmp(req_i->version, "HTTP/1.1") != 0) {
+            log_error("Not supported:%s", req_i->version);
             send_error(*client_socket, VERSIONNOTSUPPORTED);
             break;
         }
 
-        connection = sc_map_get_str(&req_i.headers, "Connection");
+        connection = sc_map_get_str(&req_i->headers, "Connection");
         if (connection && strcasecmp(connection, "keep-alive") != 0) {
             keep_alive = false;
         }
         // log_debug("Client sent: %s", connection);
 
-        if (strcmp(req_i.req_type, "GET") == 0) {
+        if (strcmp(req_i->req_type, "GET") == 0) {
             handle_get_request(client_socket, req_i);
-        } else if (strcmp(req_i.req_type, "PUT") == 0) {
+        } else if (strcmp(req_i->req_type, "PUT") == 0) {
             //TODO: implement handle put request
-        } else if (strcmp(req_i.req_type, "POST") == 0) {
+        } else if (strcmp(req_i->req_type, "POST") == 0) {
             //TODO: handle_post_request(client_socket, req_i)
         } else {
             return;//TODO: send BADREQUEST
@@ -68,6 +71,7 @@ void serve(void *client_sock) {
 
     } while (keep_alive);
     log_debug(" bye %d", *client_socket);
+    // free_request_info(req_i);
     close(*client_socket);
     return;
 }

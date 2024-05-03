@@ -3,6 +3,6 @@
 
 #include "parser.h"
 
-int run_cgi_script(request_info req_i, char *cgi_output[]);
+int run_cgi_script(request_info *req_i, char *cgi_output[]);
 
 #endif//CGI_HANDLER_H

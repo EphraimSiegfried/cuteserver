@@ -41,7 +41,7 @@ int set_env(char *env_variables[], request_info *req_i) {
     return 1;
 }
 
-int run_cgi_script(request_info req_i, char *cgi_output[]) {
+int run_cgi_script(request_info *req_i, char *cgi_output[]) {
     ssize_t count;
     char *arguments[3];
     arguments[0] = "cgi";
@@ -49,7 +49,7 @@ int run_cgi_script(request_info req_i, char *cgi_output[]) {
     arguments[2] = NULL;
 
     char *env_variables[17];
-    set_env(env_variables, &req_i);
+    set_env(env_variables, req_i);
 
     int fd[2];//2 file descriptors, one for read, one for write
     if (pipe(fd) < 0) {
@@ -67,7 +67,7 @@ int run_cgi_script(request_info req_i, char *cgi_output[]) {
         close(fd[1]);              // Close the original write end of the pipe
         // Execute command that generates output
         // printf("file_path: %s\n", req_i.file_path);
-        if (execve(req_i.real_path, arguments, env_variables) < 0) {
+        if (execve(req_i->real_path, arguments, env_variables) < 0) {
             printf("Error: %s\n", strerror(errno));
         }
         perror("execve");// Only runs if execlp fails

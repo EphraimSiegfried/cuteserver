@@ -39,6 +39,7 @@ int parse_request_line(char *buff, int buf_length, request_info *req_i) {
     const char *mapped_path = sc_map_get_str(&conf->resources[0].remaps, req_i->file_path);
     sprintf(real_path, "%s%s", conf->resources[0].root, mapped_path ? mapped_path : req_i->file_path);//TODO: what if query is in file path
     req_i->real_path = real_path;
+    log_debug("REAL PATH: %s", real_path);
 
     req_i->version = trim(strsep(&buff, "\n"));
 

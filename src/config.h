@@ -18,7 +18,7 @@ typedef struct {
 
 } config;
 
-config *conf;
+extern config *conf;
 int parse_config(char *path);
 
 #endif//CONFIG_H
