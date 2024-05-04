@@ -85,6 +85,9 @@ int main(int argv, char *args[]) {
     conf = malloc(sizeof(config));//TODO:free
     parse_config("./config.toml");// TODO:sanitize config values
 
+    uint64_t id = sc_map_get_s64(&conf->identifier, "popo.ch");
+    log_debug("root of popo: %s", conf->resources[id].root);
+
     int port = args[1] ? atoi(args[1]) : (conf->port ? conf->port : 8888);//TODO: if
     int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
 

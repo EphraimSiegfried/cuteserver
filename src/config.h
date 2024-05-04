@@ -15,6 +15,7 @@ typedef struct {
     int workers;
     int port;
     resource *resources;
+    struct sc_map_s64 identifier;//maps domain names to resource indices
 } config;
 
 extern config *conf;
