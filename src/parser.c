@@ -12,7 +12,9 @@ int parse_headers(char *buf, struct sc_map_str *header_map) {
     char *line;
     while ((line = strsep(&temp_buf, "\n"))) {//TODO: find better implementation
         if (strcmp(line, "") == 0 || strcmp(line, " ") == 0 || strcmp(line, "\r") == 0 || strcmp(line, "\r\n") == 0) break;
-        if (!(key = strtok(line, ": ")) || !(value = trim(strtok(NULL, ": ")))) return -1;
+        key = trim(strsep(&line, ": "));
+        value = trim(line);
+        if (!key || !value) return -1;
         sc_map_put_str(header_map, key, value);
     }
 
