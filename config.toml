@@ -10,10 +10,12 @@
     [resource.cute.remaps]
         "/clients/hello" = "clients/hello.php"
         "/yay" = "/cgi-bin/cgi"
+        "/post" = "/cgi-bin/post.cgi"
 
 [resource.popo]
     domain = "localhost:9999"
-    root = "./yeet"
+    root = "./data"
     cgi_bin_dir = "/usr/lib/cgi-bin"
     [resource.popo.remaps]
         "/yay" = "/cgi-bin/cgi"
+        "/post" = "/cgi-bin/post.cgi"
