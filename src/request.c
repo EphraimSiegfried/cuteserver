@@ -80,7 +80,7 @@ int handle_static_request(int *client_socket, request_info *req_i) {
     long file_len;
     int file_fd;
 
-    if ((file_fd = open(req_i->file_path, O_RDONLY)) == -1) {//open file
+    if ((file_fd = open(req_i->real_path, O_RDONLY)) == -1) {//open file
         send_error(*client_socket, SERVERERROR);
         log_fatal("Error opening %s: %s", req_i->file_path, strerror(errno));
         return -1;
@@ -106,6 +106,7 @@ int handle_static_request(int *client_socket, request_info *req_i) {
         send_file(*client_socket, file_fd);
     }
     close(file_fd);
+    log_debug("hello");
 
     return 1;
 }

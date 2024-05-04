@@ -63,7 +63,7 @@ void serve(void *client_sock) {
         if (connection && strcasecmp(connection, "keep-alive") != 0) {
             keep_alive = false;
         }
-        // log_debug("Client sent: %s", connection);
+        log_debug("Client sent: %s", connection);
 
         int return_val;
         if (ends_with("cgi", req_i->real_path)) {
