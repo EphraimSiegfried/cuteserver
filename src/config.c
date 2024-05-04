@@ -1,6 +1,7 @@
 #include "config.h"
 #include "../deps/log/log.h"
 #include "../deps/tomlparser/toml.h"
+#include "hashmap/sc_map.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,40 +43,46 @@ int parse_config(char *path) {
     toml_table_t *server = toml_table_in(toml, "server");
     if (!server) handle_error("server");
 
+    conf = malloc(sizeof(config));//TODO:free
     conf->port = get_int("port", server);
     conf->workers = get_int("workers", server);
 
-    toml_table_t *resource = toml_table_in(toml, "resource");
-    if (!resource) handle_error("cute resource");
+    toml_table_t *resources = toml_table_in(toml, "resource");
+    if (!resources) handle_error("cute resource");
 
-    int num_resources = 1;// Assuming at least one resource for now
+    int num_resources = toml_table_ntab(resources);
+    if (num_resources < 1) handle_error("Must contain at least one configuration for a resource");
 
     // Allocate memory for the resources array
-    conf->resources = malloc(num_resources * 2000);//TODO: free
+    conf->resources = malloc(num_resources * sizeof(resource));//TODO: free
 
-    // TODO: Dynamic reading of resource tables. ressource table has to be >=1
+    struct sc_map_s64 identifier;
+    sc_map_init_s64(&identifier, 0, 0);
+    for (int j = 0;; j++) {
+        const char *name_id = toml_key_in(resources, j);
+        if (!name_id) break;
+        toml_table_t *domain_config = toml_table_in(resources, name_id);
+        if (!domain_config) handle_error("resource");
 
-    toml_table_t *cute = toml_table_in(resource, "cute");
-    if (!cute) handle_error("cute resource");
+        char *domain = get_str("domain", domain_config);
+        conf->resources[j].domain = domain;
+        conf->resources[j].root = get_str("root", domain_config);
+        conf->resources[j].cgi_bin_dir = get_str("cgi_bin_dir", domain_config);
+        sc_map_put_s64(&identifier, domain, j);
 
-    conf->resources[0].domain = get_str("domain", cute);
-    conf->resources[0].root = get_str("root", cute);
-    conf->resources[0].cgi_bin_dir = get_str("cgi_bin_dir", cute);
-    // conf->resources[0].root = get_str("root", cute);
-
-    toml_table_t *remaps = toml_table_in(cute, "remaps");
-    if (!remaps) handle_error("cute remaps");
-    // conf->resources[0].remaps;
-    struct sc_map_str remaps_map;
-    sc_map_init_str(&remaps_map, 0, 0);
-    //add default remapping / to /index.html
-    sc_map_put_str(&remaps_map, "/", "/index.html");
-    for (int i = 0;; i++) {
-        const char *key = toml_key_in(remaps, i);
-        if (!key) break;
-        sc_map_put_str(&remaps_map, key, toml_string_in(remaps, key).u.s);
+        toml_table_t *remaps = toml_table_in(domain_config, "remaps");
+        if (!remaps) handle_error("remaps");
+        struct sc_map_str remaps_map;
+        sc_map_init_str(&remaps_map, 0, 0);
+        sc_map_put_str(&remaps_map, "/", "/index.html");
+        for (int i = 0;; i++) {
+            const char *key = toml_key_in(remaps, i);
+            if (!key) break;
+            sc_map_put_str(&remaps_map, key, toml_string_in(remaps, key).u.s);
+        }
+        conf->resources[j].remaps = remaps_map;
     }
-    conf->resources[0].remaps = remaps_map;
+    conf->identifier = identifier;
 
     // const char *key;
     // const char *value;
@@ -83,4 +90,9 @@ int parse_config(char *path) {
     //     printf("Key:[%s], Value:[%s] \n", key, value);
     // }
     return 1;
+}
+
+void cleanup_config() {
+    free(conf->resources);
+    free(conf);
 }
