@@ -5,18 +5,16 @@
 #include "utils.h"
 #include <string.h>
 
-int parse_headers(char *buf, request_info *req_i) {
-    struct sc_map_str map;
+int parse_headers(char *buf, struct sc_map_str *header_map) {
     const char *key, *value;
-    sc_map_init_str(&map, 0, 0);
+    sc_map_init_str(header_map, 0, 0);
     char *temp_buf = buf;
     char *line;
     while ((line = strsep(&temp_buf, "\n"))) {//TODO: find better implementation
         if (strcmp(line, "") == 0 || strcmp(line, " ") == 0 || strcmp(line, "\r") == 0 || strcmp(line, "\r\n") == 0) break;
         if (!(key = strtok(line, ": ")) || !(value = trim(strtok(NULL, ": ")))) return -1;
-        sc_map_put_str(&map, key, value);
+        sc_map_put_str(header_map, key, value);
     }
-    req_i->headers = map;
     // sc_map_foreach(&map, key, value) {
     //     log_debug("KEY: [%s] | VALUE: [%s]", jey, value);
     // }

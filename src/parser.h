@@ -15,5 +15,5 @@ typedef struct {
 
 int parse_request_line(char *buff, int buf_length, request_info *req_info);
 
-int parse_headers(char *buf, request_info *req_info);
+int parse_headers(char *buf, struct sc_map_str *header_map);
 #endif//WEBSERVER_PARSER_H
