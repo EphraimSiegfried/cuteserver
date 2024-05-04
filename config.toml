@@ -4,7 +4,7 @@
     log-file = "./logs"
 
 [resource.cute]
-    domain = "cute.ch"
+    domain = "localhost:8888"
     root = "./data"
     cgi_bin_dir = "/usr/lib/cgi-bin"
     [resource.cute.remaps]
@@ -12,8 +12,8 @@
         "/yay" = "/cgi-bin/cgi"
 
 [resource.popo]
-    domain = "popo.ch"
-    root = "./data"
+    domain = "localhost:9999"
+    root = "./yeet"
     cgi_bin_dir = "/usr/lib/cgi-bin"
     [resource.popo.remaps]
         "/yay" = "/cgi-bin/cgi"
