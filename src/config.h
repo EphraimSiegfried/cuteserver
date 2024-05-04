@@ -21,4 +21,6 @@ typedef struct {
 extern config *conf;
 int parse_config(char *path);
 
+void cleanup_config();
+
 #endif//CONFIG_H

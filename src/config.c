@@ -91,3 +91,8 @@ int parse_config(char *path) {
     // }
     return 1;
 }
+
+void cleanup_config() {
+    free(conf->resources);
+    free(conf);
+}
