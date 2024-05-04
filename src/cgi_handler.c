@@ -36,8 +36,10 @@ int set_env(char *env_variables[], request_info *req_i) {
     env_variables[12] = "AUTH_TYPE=NULL";
     env_variables[13] = "REMOTE_USER=NULL";
     env_variables[14] = "REMOTE_IDENT=NULL";
-    env_variables[15] = "CONTENT_TYPE=text/html";//default value, has to be overridden by cgi script
-    env_variables[16] = "CONTENT_LENGTH=NULL";   //TODO
+    env_variables[15] = malloc(ENV_BUF_SIZE);
+    sprintf(env_variables[15], "CONTENT_TYPE=%s", sc_map_get_str(&req_i->headers, "Content-Type"));//Content Type of Request
+    env_variables[16] = malloc(ENV_BUF_SIZE);
+    sprintf(env_variables[16], "CONTENT_LENGTH=%lu", strlen(req_i->request_body));//Length of Content passed to script (body)
     env_variables[17] = NULL;
     // size_t i = 17;
     // uint32_t size = sc_map_size_str(&req_i->headers);
@@ -49,28 +51,31 @@ int set_env(char *env_variables[], request_info *req_i) {
 
 int run_cgi_script(request_info *req_i, char *cgi_output[]) {
     ssize_t count;
-    char *arguments[3];
-    arguments[0] = "cgi";
-    arguments[1] = "23";
-    arguments[2] = NULL;
+    char *arguments[2] = {"cgi", NULL};//TODO: get name of script from path
 
     char *env_variables[18];
     set_env(env_variables, req_i);
 
-    int fd[2];//2 file descriptors, one for read, one for write
-    if (pipe(fd) < 0) {
+    //stdin: parent -> child, stdout: child -> parent
+    int stdin_pipe[2], stdout_pipe[2];//pipes have two ends (read & write)
+    if (pipe(stdin_pipe) < 0 || pipe(stdout_pipe) < 0) {
         printf("Pipe error");
         return -1;
     }
 
-    // puts("hello");
     pid_t pid = fork();//create child process
 
     if (pid == 0) {
         // Child
-        close(fd[0]);              // Close unused read end
-        dup2(fd[1], STDOUT_FILENO);// Redirect stdout to pipe
-        close(fd[1]);              // Close the original write end of the pipe
+        //close parent ends
+        close(stdin_pipe[1]);
+        close(stdout_pipe[0]);
+
+        dup2(stdin_pipe[0], STDIN_FILENO);
+        dup2(stdout_pipe[1], STDOUT_FILENO);
+        close(stdin_pipe[0]);
+        close(stdout_pipe[1]);
+
         // Execute command that generates output
         if (execve(req_i->real_path, arguments, env_variables) < 0) {
             printf("Error: %s\n", strerror(errno));
@@ -80,25 +85,26 @@ int run_cgi_script(request_info *req_i, char *cgi_output[]) {
     } else if (pid > 0) {
         // This is the parent process
         int status;
-        close(fd[1]);// Close unused write end
+
+        write(stdin_pipe[1], req_i->request_body, strlen(req_i->request_body));
+        close(stdin_pipe[1]);//not used anymore
 
         // Read the output from the child process
-        count = read(fd[0], *cgi_output, 1999);//TODO:FIX MEMORY MANAGEMENT!!
+        count = read(stdout_pipe[0], *cgi_output, 1999);//TODO:FIX MEMORY MANAGEMENT!!
         if (count == -1) {
             perror("read");
             exit(EXIT_FAILURE);
         }
         (*cgi_output)[count] = '\0';// Null-terminate the string
+        close(stdout_pipe[0]);
 
         // Wait for the child to finish
         waitpid(pid, &status, 0);
 
-        close(fd[0]);// Close the read end
     } else {
         printf("Error");
         return -1;
     }
-
 
     return count;
 }

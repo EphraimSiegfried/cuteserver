@@ -88,7 +88,6 @@ int handle_static_request(int *client_socket, request_info *req_i) {
     file_len = (long) lseek(file_fd, (off_t) 0, SEEK_END);// lseek to the file end to find the length of the file
     lseek(file_fd, (off_t) 0, SEEK_SET);                  // seek back to the file start ready for reading
 
-
     response_i.status_msg = "Ok";
     response_i.status_code = 200;
     response_i.version = "HTTP/1.1";
