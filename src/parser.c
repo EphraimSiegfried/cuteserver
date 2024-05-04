@@ -62,12 +62,3 @@ int resolve_real_path(request_info *req_i) {
     log_debug("resolved real path: %s", req_i->real_path);
     return 1;
 }
-
-// int resolve_path(request_info *req_i) {
-//     if (req_i->file_path == NULL) return NULL;
-//     char real_path[1024];
-//     strcpy(real_path, conf->resources[0].root);
-//     const char *mapped_path = sc_map_get_str(&conf->resources[0].remaps, req_i->file_path);
-//     if (mapped_path == NULL) return NULL;
-//     strcat(real_path, mapped_path);
-// }

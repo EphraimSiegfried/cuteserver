@@ -42,7 +42,7 @@ void serve(void *client_info) {
             log_error("%s %d", strerror(errno), *client_socket);
             break;
         }
-        log_debug(buff);
+        //log_debug(buff);
 
         if ((rl_len = parse_request_line(buff, recvd_bytes, req_i)) < 0) {
             send_error(*client_socket, BADREQUEST);
@@ -50,12 +50,14 @@ void serve(void *client_info) {
         }
         log_info("Main:%s %s %s %s", req_i->req_type, req_i->file_path, req_i->version, req_i->real_path);
 
-
         sc_map_init_str(&req_i->headers, 0, 0);
         if ((hdr_len = parse_headers(buff + rl_len, &req_i->headers)) < 0) {
             send_error(*client_socket, BADREQUEST);
             break;
         }
+
+        req_i->request_body = buff + hdr_len + rl_len;
+
         resolve_real_path(req_i);
 
         if (access(req_i->real_path, F_OK) != 0) {
