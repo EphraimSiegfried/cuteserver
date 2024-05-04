@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/fcntl.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 struct {
@@ -60,7 +61,8 @@ int handle_dynamic_request(int *sock, request_info *req_i) {
     sc_map_put_str(&response_i.headers, "Content-Length", str);
     sc_map_put_str(&response_i.headers, "Content-Type", "text/html");//TODO: check memory allocation
     sc_map_put_str(&response_i.headers, "Connection", "keep-alive");
-    send_response(*sock, &response_i, content);
+    send_request_info(*sock, &response_i);
+    send(*sock, content, cgi_output_len - hdr_len, 0);
 
     free(cgi_output);
     return 1;
