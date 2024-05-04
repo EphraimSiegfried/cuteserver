@@ -18,6 +18,11 @@
 #define MAX_BUF_SIZE 8122
 #define MAX_PENDING 21
 
+<<<<<<< HEAD
+void serve(void *client_sock) {
+    int *client_socket = client_sock;
+=======
+config *conf = NULL;
 
 typedef struct {
     int client_socket;
@@ -27,6 +32,7 @@ typedef struct {
 void serve(void *client_info) {
     client_socket_info *client_sock_i = (client_socket_info *) client_info;
     int *client_socket = &client_sock_i->client_socket;
+>>>>>>> refs/remotes/origin/main
     char buff[MAX_BUF_SIZE];
     const char *connection;
     int recvd_bytes, rl_len, hdr_len;
@@ -93,7 +99,14 @@ void serve(void *client_info) {
 int main(int argv, char *args[]) {
     parse_config("./config.toml");// TODO:sanitize config values
 
+<<<<<<< HEAD
     int port = args[1] ? atoi(args[1]) : (conf->port ? conf->port : 8888);//TODO: if
+=======
+    uint64_t id = sc_map_get_s64(&conf->identifier, "popo.ch");
+    log_debug("root of popo: %s", conf->resources[id].root);
+
+    int port = args[1] ? atoi(args[1]) : (conf->port ? conf->port : 8888);
+>>>>>>> refs/remotes/origin/main
     int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
 
     log_set_level(log_level);

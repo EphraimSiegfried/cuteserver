@@ -44,7 +44,6 @@ int handle_dynamic_request(int *sock, request_info *req_i) {
     char *cgi_output = malloc(sizeof(char) * 5000);
     if (cgi_output == NULL) return -1;
     int cgi_output_len = run_cgi_script(req_i, &cgi_output);
-    log_debug("hey");
 
     response_info response_i;
 
@@ -107,7 +106,6 @@ int handle_static_request(int *client_socket, request_info *req_i) {
         send_file(*client_socket, file_fd);
     }
     close(file_fd);
-    log_debug("hello");
 
     return 1;
 }

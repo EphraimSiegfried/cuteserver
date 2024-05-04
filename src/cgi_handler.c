@@ -1,4 +1,5 @@
 #include "cgi_handler.h"
+#include <arpa/inet.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -17,22 +18,26 @@ int set_env(char *env_variables[], request_info *req_i) {
     env_variables[2] = "GATEWAY_INTERFACE=CGI/1.1";
     env_variables[3] = malloc(ENV_BUF_SIZE);
     sprintf(env_variables[3], "SERVER_PROTOCOL=%s", req_i->version);
-    env_variables[4] = "SERVER_PORT=8888";// TODO: aus config
+    env_variables[4] = malloc(ENV_BUF_SIZE);
+    sprintf(env_variables[4], "SERVER_PORT=%d", 8888);
     env_variables[5] = malloc(ENV_BUF_SIZE);
     sprintf(env_variables[5], "REQUEST_METHOD=%s", req_i->req_type);
     env_variables[6] = malloc(ENV_BUF_SIZE);
     sprintf(env_variables[6], "PATH_INFO=%s", req_i->file_path);
     env_variables[7] = malloc(ENV_BUF_SIZE);
     sprintf(env_variables[7], "PATH_TRANSLATED=%s", req_i->real_path);
-    env_variables[8] = "SCRIPT_NAME=CGI/1.1";
-    env_variables[9] = "QUERY_STRING=";//TODO: for get methods decode query string
-    env_variables[10] = "REMOTE_HOST=cuteserver";
-    env_variables[11] = "REMOTE_ADDR=localhost";//TODO:
+    env_variables[8] = malloc(ENV_BUF_SIZE);
+    sprintf(env_variables[8], "SCRIPT_NAME=%s", "scriptname");//TODO: get script name from path
+    env_variables[9] = malloc(ENV_BUF_SIZE);
+    sprintf(env_variables[9], "QUERY_STRING=%s", req_i->query);
+    env_variables[10] = "REMOTE_HOST=NULL";
+    env_variables[11] = malloc(ENV_BUF_SIZE);
+    sprintf(env_variables[11], "REMOTE_ADDR=%s", inet_ntoa(req_i->client_addr.sin_addr));//TODO:
     env_variables[12] = "AUTH_TYPE=NULL";
     env_variables[13] = "REMOTE_USER=NULL";
     env_variables[14] = "REMOTE_IDENT=NULL";
-    env_variables[15] = "CONTENT_TYPE=CGI/1.1";
-    env_variables[16] = "CONTENT_LENGTH=CGI/1.1";
+    env_variables[15] = "CONTENT_TYPE=text/html";//default value, has to be overridden by cgi script
+    env_variables[16] = "CONTENT_LENGTH=NULL";   //TODO
     env_variables[17] = NULL;
     // size_t i = 17;
     // uint32_t size = sc_map_size_str(&req_i->headers);
