@@ -23,6 +23,7 @@ char *get_str(char *field, toml_table_t *tbl) {
     return data.u.s;
 }
 
+config *conf = NULL;
 
 int parse_config(char *path) {
     FILE *fp;

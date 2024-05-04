@@ -18,7 +18,6 @@
 #define MAX_BUF_SIZE 8122
 #define MAX_PENDING 21
 
-config *conf = NULL;
 void serve(void *client_sock) {
     int *client_socket = client_sock;
     char buff[MAX_BUF_SIZE];
@@ -36,6 +35,7 @@ void serve(void *client_sock) {
             log_error("%s %d", strerror(errno), *client_socket);
             break;
         }
+        log_debug(buff);
 
         if ((rl_len = parse_request_line(buff, recvd_bytes, req_i)) < 0) {
             send_error(*client_socket, BADREQUEST);
@@ -43,15 +43,17 @@ void serve(void *client_sock) {
         }
         log_info("Main:%s %s %s %s", req_i->req_type, req_i->file_path, req_i->version, req_i->real_path);
 
-        if (access(req_i->real_path, F_OK) != 0) {
-            log_error("File not found: ", req_i->file_path);
-            send_error(*client_socket, NOTFOUND);
-        }
 
         sc_map_init_str(&req_i->headers, 0, 0);
         if ((hdr_len = parse_headers(buff + rl_len, &req_i->headers)) < 0) {
             send_error(*client_socket, BADREQUEST);
             break;
+        }
+        resolve_real_path(req_i);
+
+        if (access(req_i->real_path, F_OK) != 0) {
+            log_error("File not found: ", req_i->file_path);
+            send_error(*client_socket, NOTFOUND);
         }
 
         if (strcmp(req_i->version, "HTTP/1.1") != 0) {
@@ -82,11 +84,7 @@ void serve(void *client_sock) {
 }
 
 int main(int argv, char *args[]) {
-    conf = malloc(sizeof(config));//TODO:free
     parse_config("./config.toml");// TODO:sanitize config values
-
-    uint64_t id = sc_map_get_s64(&conf->identifier, "popo.ch");
-    log_debug("root of popo: %s", conf->resources[id].root);
 
     int port = args[1] ? atoi(args[1]) : (conf->port ? conf->port : 8888);//TODO: if
     int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
