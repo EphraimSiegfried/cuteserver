@@ -12,57 +12,24 @@
 #define BUFFER_LEN 80000
 
 
-struct {
-    char *ext;
-    char *mime;
-} extensions[] = {
-        {"gif", "image/gif"},
-        {"jpg", "image/jpg"},
-        {"jpeg", "image/jpeg"},
-        {"png", "image/png"},
-        {"ico", "image/ico"},
-        {"zip", "image/zip"},
-        {"gz", "image/gz"},
-        {"tar", "image/tar"},
-        {"htm", "text/html"},
-        {"html", "text/html"},
-        {"ico", "image/x-icon"},
-        {"css", "text/css"},
-        {"js", "text/javascript"},
-        {0, 0}};
-
-char *get_mime_type(char *file_path) {
-    char *extension_p = strrchr(file_path, '.') + 1;
-    for (int i = 0; extensions[i].ext != 0; i++) {
-        if (strcmp(extension_p, extensions[i].ext) == 0) {
-            return extensions[i].mime;
-        }
-    }
-    return "/du failsch ";
-}
-
-int send_ok(int socket_fd, char *file_path) {
-    int file_fd;
-    long file_len, num_bytes;
-    char buffer[BUFFER_LEN];
-    char *mime = get_mime_type(file_path);
-    if ((file_fd = open(file_path, O_RDONLY)) == -1) {//open file
-        log_fatal("Error opening %s: %s", file_path, strerror(errno));
-        return -1;
-    }
-    file_len = (long) lseek(file_fd, (off_t) 0, SEEK_END);                                                                // lseek to the file end to find the length of the file
-    lseek(file_fd, (off_t) 0, SEEK_SET);                                                                                  // seek back to the file start ready for reading
-    sprintf(buffer, "HTTP/1.1 200 OK\nConnection: keep-alive\nContent-Length: %ld\nContent-Type: %s\n\n", file_len, mime);// Header + a blank line
-    write(socket_fd, buffer, strlen(buffer));
-
-    /* send file in 8KB block - last block may be smaller */
-    while ((num_bytes = read(file_fd, buffer, BUFFER_LEN)) > 0) {
-        write(socket_fd, buffer, num_bytes);
-    }
-    log_info("Sending %s over socket: %d", file_path, socket_fd);
-    close(file_fd);
-    return 1;
-}
+// int send_ok(int socket_fd, char *file_path) {
+//     int file_fd;
+//     long file_len;
+//     char buffer[BUFFER_LEN];
+//     char *mime = get_mime_type(file_path);
+//     if ((file_fd = open(file_path, O_RDONLY)) == -1) {//open file
+//         log_fatal("Error opening %s: %s", file_path, strerror(errno));
+//         return -1;
+//     }
+//     file_len = (long) lseek(file_fd, (off_t) 0, SEEK_END);                                                                // lseek to the file end to find the length of the file
+//     lseek(file_fd, (off_t) 0, SEEK_SET);                                                                                  // seek back to the file start ready for reading
+//     sprintf(buffer, "HTTP/1.1 200 OK\nConnection: keep-alive\nContent-Length: %ld\nContent-Type: %s\n\n", file_len, mime);// Header + a blank line
+//     write(socket_fd, buffer, strlen(buffer));
+//
+//     log_info("Sending %s over socket: %d", file_path, socket_fd);
+//     close(file_fd);
+//     return 1;
+// }
 
 int send_ok_buf(int socket_fd, char **content_buffer, char *mime, long size) {
     char response_buffer[BUFFER_LEN];
@@ -88,6 +55,25 @@ int send_error(int socket_fd, short unsigned int type) {
 }
 
 int send_response(int socket_fd, response_info *res_i, char *request_body) {
+
+    // send request_body
+    send(socket_fd, request_body, strlen(request_body), 0);
+
+    return 1;
+}
+
+//takes open file descriptor. fd has to be closed outside of this function
+int send_file(int socket_fd, int file_fd) {
+    int num_bytes;
+    char buffer[BUFFER_LEN];
+    /* send file in 8KB block - last block may be smaller */
+    while ((num_bytes = read(file_fd, buffer, BUFFER_LEN)) > 0) {
+        write(socket_fd, buffer, num_bytes);
+    }
+    return 1;
+}
+
+int send_request_info(int socket_fd, response_info *res_i) {
     const char *key;
     const char *value;
     char response_line[BUFFER_LEN];
@@ -103,9 +89,6 @@ int send_response(int socket_fd, response_info *res_i, char *request_body) {
         send(socket_fd, header_line, strlen(header_line), 0);
     }
     send(socket_fd, "\n", 1, 0);
-
-    // send request_body
-    send(socket_fd, request_body, strlen(request_body), 0);
-
+    free(header_line);
     return 1;
 }

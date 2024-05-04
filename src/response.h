@@ -14,4 +14,6 @@ int send_ok_buf(int socket_fd, char **content_buffer, char *mime, long size);
 int send_error(int socket_fd, short unsigned int type);
 int send_response(int socket_fd, response_info *response_i, char *request_body);
 
+int send_file(int socket_fd, int file_fd);
+int send_request_info(int socket_fd, response_info *res_i);
 #endif//WEBSERVER_RESPONSE_H

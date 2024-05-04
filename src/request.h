@@ -10,7 +10,9 @@
 #define FORBIDDEN 403
 #define NOTFOUND 404
 #define VERSIONNOTSUPPORTED 505
+#define SERVERERROR 500
 
-int handle_get_request(int *sock, request_info *req_i);
+int handle_static_request(int *client_socket, request_info *req_i);
+int handle_dynamic_request(int *sock, request_info *req_i);
 
 #endif//WEBSERVER_REQUEST_H

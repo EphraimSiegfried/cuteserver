@@ -4,6 +4,7 @@
 #include "parser.h"
 #include "request.h"
 #include "response.h"
+#include "utils.h"
 #include <arpa/inet.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -42,6 +43,11 @@ void serve(void *client_sock) {
         }
         log_info("Main:%s %s %s %s", req_i->req_type, req_i->file_path, req_i->version, req_i->real_path);
 
+        if (access(req_i->real_path, F_OK) != 0) {
+            log_error("File not found: ", req_i->file_path);
+            send_error(*client_socket, NOTFOUND);
+        }
+
         if ((hdr_len = parse_headers(buff + rl_len, req_i)) < 0) {
             send_error(*client_socket, BADREQUEST);
             break;
@@ -59,15 +65,13 @@ void serve(void *client_sock) {
         }
         // log_debug("Client sent: %s", connection);
 
-        if (strcmp(req_i->req_type, "GET") == 0) {
-            handle_get_request(client_socket, req_i);
-        } else if (strcmp(req_i->req_type, "PUT") == 0) {
-            //TODO: implement handle put request
-        } else if (strcmp(req_i->req_type, "POST") == 0) {
-            //TODO: handle_post_request(client_socket, req_i)
+        int return_val;
+        if (ends_with("cgi", req_i->real_path)) {
+            return_val = handle_dynamic_request(client_socket, req_i);
         } else {
-            return;//TODO: send BADREQUEST
+            return_val = handle_static_request(client_socket, req_i);
         }
+        if (return_val < 0) break;
 
     } while (keep_alive);
     log_debug(" bye %d", *client_socket);
@@ -84,11 +88,6 @@ int main(int argv, char *args[]) {
     int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
 
     log_set_level(log_level);
-
-    char cwd[PATH_MAX];
-    if (getcwd(cwd, PATH_MAX)) {
-        printf("\nCWD in main: %s\n", cwd);
-    }
     // SERVER SOCKET
     struct sockaddr_in server_addr;
 
