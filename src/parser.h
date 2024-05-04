@@ -1,6 +1,7 @@
 #ifndef WEBSERVER_PARSER_H
 #define WEBSERVER_PARSER_H
 
+#include <netinet/in.h>
 #define TODO_SIZE 6342
 #include "../deps/hashmap/sc_map.h"
 
@@ -10,6 +11,7 @@ typedef struct {
     char *query;
     char *real_path;
     char *version;
+    struct sockaddr_in client_addr;
     struct sc_map_str headers;
 } request_info;
 

@@ -19,8 +19,15 @@
 #define MAX_PENDING 21
 
 config *conf = NULL;
-void serve(void *client_sock) {
-    int *client_socket = client_sock;
+
+typedef struct {
+    int client_socket;
+    struct sockaddr_in client_address;
+} client_socket_info;
+
+void serve(void *client_info) {
+    client_socket_info *client_sock_i = (client_socket_info *) client_info;
+    int *client_socket = &client_sock_i->client_socket;
     char buff[MAX_BUF_SIZE];
     const char *connection;
     int recvd_bytes, rl_len, hdr_len;
@@ -30,7 +37,7 @@ void serve(void *client_sock) {
         memset(buff, 0, sizeof(buff));
         request_info req_info = {0};
         request_info *req_i = &req_info;
-
+        req_i->client_addr = client_sock_i->client_address;
 
         if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) <= 0) {
             log_error("%s %d", strerror(errno), *client_socket);
@@ -85,7 +92,7 @@ int main(int argv, char *args[]) {
     conf = malloc(sizeof(config));//TODO:free
     parse_config("./config.toml");// TODO:sanitize config values
 
-    int port = args[1] ? atoi(args[1]) : (conf->port ? conf->port : 8888);//TODO: if
+    int port = args[1] ? atoi(args[1]) : (conf->port ? conf->port : 8888);
     int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
 
     log_set_level(log_level);
@@ -116,21 +123,21 @@ int main(int argv, char *args[]) {
     threadpool thpool = thpool_init(8);
 
     while (1) {
-        struct sockaddr_in client_addr;
-        unsigned int client_addr_len = sizeof(client_addr);
-        int *client_sock = malloc(sizeof(int));
+        client_socket_info *client_sock_i = malloc(sizeof(client_socket_info));
+        unsigned int client_addr_len = sizeof(client_sock_i->client_address);
         // log_debug("%d", thpool_num_threads_working(thpool));
-        *client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &client_addr_len);
+        client_sock_i->client_socket = accept(server_sock, (struct sockaddr *) &client_sock_i->client_address, &client_addr_len);
 
-        log_debug("Created sock: %d", *client_sock);
-        if (*client_sock < 0) {
+
+        log_debug("Created sock: %d", client_sock_i->client_socket);
+        if (client_sock_i->client_socket < 0) {
             log_fatal("Accepting Error: %d", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        log_info("New connection accepted from %s:%d", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+        log_info("New connection accepted from %s:%d", inet_ntoa(client_sock_i->client_address.sin_addr), ntohs(client_sock_i->client_address.sin_port));
 
         // setsockopt(*client_sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
-        thpool_add_work(thpool, serve, client_sock);
+        thpool_add_work(thpool, serve, client_sock_i);
     }
 }
