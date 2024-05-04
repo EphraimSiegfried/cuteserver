@@ -33,6 +33,7 @@ int set_env(char *env_variables[], request_info *req_i) {
     env_variables[14] = "REMOTE_IDENT=NULL";
     env_variables[15] = "CONTENT_TYPE=CGI/1.1";
     env_variables[16] = "CONTENT_LENGTH=CGI/1.1";
+    env_variables[17] = NULL;
     // size_t i = 17;
     // uint32_t size = sc_map_size_str(&req_i->headers);
     // sc_map_foreach(&req_i->headers, key, value) {
@@ -48,7 +49,7 @@ int run_cgi_script(request_info *req_i, char *cgi_output[]) {
     arguments[1] = "23";
     arguments[2] = NULL;
 
-    char *env_variables[17];
+    char *env_variables[18];
     set_env(env_variables, req_i);
 
     int fd[2];//2 file descriptors, one for read, one for write
@@ -66,7 +67,6 @@ int run_cgi_script(request_info *req_i, char *cgi_output[]) {
         dup2(fd[1], STDOUT_FILENO);// Redirect stdout to pipe
         close(fd[1]);              // Close the original write end of the pipe
         // Execute command that generates output
-        // printf("file_path: %s\n", req_i.file_path);
         if (execve(req_i->real_path, arguments, env_variables) < 0) {
             printf("Error: %s\n", strerror(errno));
         }
