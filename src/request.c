@@ -44,6 +44,7 @@ int handle_dynamic_request(int *sock, request_info *req_i) {
     char *cgi_output = malloc(sizeof(char) * 5000);
     if (cgi_output == NULL) return -1;
     int cgi_output_len = run_cgi_script(req_i, &cgi_output);
+    log_debug("hey");
 
     response_info response_i;
 
@@ -51,6 +52,7 @@ int handle_dynamic_request(int *sock, request_info *req_i) {
     response_i.status_code = 200;
     response_i.version = "HTTP/1.1";
     response_i.req_type = req_i->req_type;
+    sc_map_init_str(&response_i.headers, 0, 0);
     sc_map_put_str(&response_i.headers, "Content-Type", "text/html");//default value, gets overwritten by cgi-script
     sc_map_put_str(&response_i.headers, "Connection", "keep-alive");
     int hdr_len = parse_headers(cgi_output, &req_i->headers);

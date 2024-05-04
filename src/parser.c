@@ -7,7 +7,6 @@
 
 int parse_headers(char *buf, struct sc_map_str *header_map) {
     const char *key, *value;
-    sc_map_init_str(header_map, 0, 0);
     char *temp_buf = buf;
     char *line;
     while ((line = strsep(&temp_buf, "\n"))) {//TODO: find better implementation
@@ -15,8 +14,9 @@ int parse_headers(char *buf, struct sc_map_str *header_map) {
         if (!(key = strtok(line, ": ")) || !(value = trim(strtok(NULL, ": ")))) return -1;
         sc_map_put_str(header_map, key, value);
     }
-    // sc_map_foreach(&map, key, value) {
-    //     log_debug("KEY: [%s] | VALUE: [%s]", jey, value);
+    // const char *keyy, *valuee;
+    // sc_map_foreach(header_map, keyy, valuee) {
+    //     log_debug("KEY: [%s] | VALUE: [%s]", keyy, valuee);
     // }
     return temp_buf - buf;
 }

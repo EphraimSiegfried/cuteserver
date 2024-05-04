@@ -48,6 +48,7 @@ void serve(void *client_sock) {
             send_error(*client_socket, NOTFOUND);
         }
 
+        sc_map_init_str(&req_i->headers, 0, 0);
         if ((hdr_len = parse_headers(buff + rl_len, &req_i->headers)) < 0) {
             send_error(*client_socket, BADREQUEST);
             break;
