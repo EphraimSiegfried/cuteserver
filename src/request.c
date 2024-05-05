@@ -54,7 +54,7 @@ int handle_dynamic_request(int *sock, request_info *req_i) {
     sc_map_init_str(&response_i.headers, 0, 0);
     sc_map_put_str(&response_i.headers, "Content-Type", "text/html");//default value, gets overwritten by cgi-script
     sc_map_put_str(&response_i.headers, "Connection", "keep-alive");
-    int hdr_len = parse_headers(cgi_output, &req_i->headers);
+    int hdr_len = parse_headers(cgi_output, &response_i.headers);
     char *content = cgi_output + hdr_len;
     char str[20];
     sprintf(str, "%d", cgi_output_len - hdr_len);
