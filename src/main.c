@@ -63,6 +63,7 @@ void serve(void *client_info) {
         if (access(req_i->real_path, F_OK) != 0) {
             log_error("File not found: ", req_i->file_path);
             send_error(*client_socket, NOTFOUND);
+            break;
         }
 
         if (strcmp(req_i->version, "HTTP/1.1") != 0) {
