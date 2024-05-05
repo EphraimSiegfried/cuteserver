@@ -18,6 +18,7 @@ struct {
         {"gif", "image/gif"},
         {"jpg", "image/jpg"},
         {"jpeg", "image/jpeg"},
+        {"JPG", "image/jpeg"},
         {"png", "image/png"},
         {"ico", "image/ico"},
         {"zip", "image/zip"},
@@ -28,6 +29,7 @@ struct {
         {"ico", "image/x-icon"},
         {"css", "text/css"},
         {"js", "text/javascript"},
+        {"svg", "image/svg+xml"},
         {0, 0}};
 
 char *get_mime_type(char *file_path) {
