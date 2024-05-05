@@ -5,12 +5,15 @@
 
 [resource.cute]
     domain = "localhost:8888"
-    root = "./data"
+    root = "/Users/ephraimsiegfried/repos/shared/os/Webserver/data/yeet/dist"
     cgi_bin_dir = "/usr/lib/cgi-bin"
     [resource.cute.remaps]
         "/clients/hello" = "clients/hello.php"
-        "/yay" = "/cgi-bin/cgi"
-        "/post" = "/cgi-bin/post.cgi"
+        "/api/messages" = "/cgi-bin/hello.cgi"
+        "/messages" = "/cgi-bin/hello.cgi"
+        # "/yay" = "/cgi-bin/cgi"
+        # "/post" = "/cgi-bin/post.cgi"
+        # "/hello"="/cgi-bin/hello.cgi"
 
 [resource.popo]
     domain = "localhost:9999"
