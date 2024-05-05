@@ -1,2 +1,2 @@
-# Webserver
-A simple web server written in C
+# cuteserver
+A simple and cute web server written in C
