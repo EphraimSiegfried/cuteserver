@@ -17,3 +17,4 @@ include_directories(deps)
 # Define the target executable and its source files
 file(GLOB_RECURSE SRC_FILES "src/*.c" "deps/*/*.c")
 add_executable(${PROJECT_NAME} ${SRC_FILES})
+install(TARGETS ${PROJECT_NAME})

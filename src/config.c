@@ -32,7 +32,7 @@ int parse_config(char *path) {
     // 1. Read and parse toml file
     fp = fopen(path, "r");
     if (!fp) {
-        log_error("cannot open config file: ", strerror(errno));
+        log_error("cannot open config file %s: %s", path, strerror(errno));
     }
     toml_table_t *toml = toml_parse_file(fp, errbuf, sizeof(errbuf));
     fclose(fp);

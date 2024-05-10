@@ -94,10 +94,11 @@ void serve(void *client_info) {
 }
 
 int main(int argv, char *args[]) {
-    parse_config("./config.toml");// TODO:sanitize config values
 
     int port = args[1] ? atoi(args[1]) : (conf->port ? conf->port : 8888);//TODO: if
     int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
+    char *config_path = args[3] ? args[3] : "./config.toml";
+    parse_config(config_path);
 
     log_set_level(log_level);
     // SERVER SOCKET
