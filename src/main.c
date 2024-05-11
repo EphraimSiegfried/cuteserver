@@ -93,7 +93,20 @@ void serve(void *client_info) {
     return;
 }
 
+int server_sock;
+threadpool thpool;
+void cleanup() {
+    log_debug("Exiting...cleaning up");
+    close(server_sock);
+    thpool_destroy(thpool);
+    cleanup_config();
+    log_debug("Finished cleanup");
+    exit(0);
+}
+
+
 int main(int argv, char *args[]) {
+    signal(SIGINT, cleanup);
 
     int port = args[1] ? atoi(args[1]) : (conf->port ? conf->port : 8888);//TODO: if
     int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
@@ -105,7 +118,7 @@ int main(int argv, char *args[]) {
     struct sockaddr_in server_addr;
 
     // PF_INET= ipv4, SOCK_STREAM=tcp
-    int server_sock = socket(PF_INET, SOCK_STREAM, 0);
+    server_sock = socket(PF_INET, SOCK_STREAM, 0);
 
     server_addr.sin_family = AF_INET;
     // htons= host to network short
@@ -125,7 +138,7 @@ int main(int argv, char *args[]) {
         exit(EXIT_FAILURE);
     }
 
-    threadpool thpool = thpool_init(8);
+    thpool = thpool_init(8);
 
     while (1) {
         client_socket_info *client_sock_i = malloc(sizeof(client_socket_info));
