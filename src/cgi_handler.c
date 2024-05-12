@@ -11,41 +11,37 @@
 #define ENV_BUF_SIZE 100
 
 int set_env(char *env_variables[], request_info *req_i) {
-    // const char *key;
-    // const char *value;
+    //instead of malloc, use a buffer
+    char temp[ENV_BUF_SIZE];
+
     env_variables[0] = "SERVER_SOFTWARE=cuteserver/0.1";
     env_variables[1] = "SERVER_NAME=localhost";// TODO: aus config
     env_variables[2] = "GATEWAY_INTERFACE=CGI/1.1";
-    env_variables[3] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[3], "SERVER_PROTOCOL=%s", req_i->version);
-    env_variables[4] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[4], "SERVER_PORT=%d", 8888);
-    env_variables[5] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[5], "REQUEST_METHOD=%s", req_i->req_type);
-    env_variables[6] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[6], "PATH_INFO=%s", req_i->file_path);
-    env_variables[7] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[7], "PATH_TRANSLATED=%s", req_i->real_path);
-    env_variables[8] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[8], "SCRIPT_NAME=%s", "scriptname");//TODO: get script name from path
-    env_variables[9] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[9], "QUERY_STRING=%s", req_i->query);
+    sprintf(temp, "SERVER_PROTOCOL=%s", req_i->version);
+    strcpy(env_variables[3], temp);
+    sprintf(temp, "SERVER_PORT=%d", 8888);
+    strcpy(env_variables[4], temp);
+    sprintf(temp, "REQUEST_METHOD=%s", req_i->req_type);
+    strcpy(env_variables[5], temp);
+    sprintf(temp, "PATH_INFO=%s", req_i->file_path);
+    strcpy(env_variables[6], temp);
+    sprintf(temp, "PATH_TRANSLATED=%s", req_i->real_path);
+    strcpy(env_variables[7], temp);
+    sprintf(temp, "SCRIPT_NAME=%s", "scriptname");//TODO: get script name from path
+    strcpy(env_variables[8], temp);
+    sprintf(temp, "QUERY_STRING=%s", req_i->query);
+    strcpy(env_variables[9], temp);
     env_variables[10] = "REMOTE_HOST=NULL";
-    env_variables[11] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[11], "REMOTE_ADDR=%s", inet_ntoa(req_i->client_addr.sin_addr));//TODO:
+    sprintf(temp, "REMOTE_ADDR=%s", inet_ntoa(req_i->client_addr.sin_addr));//TODO:
+    strcpy(env_variables[11], temp);
     env_variables[12] = "AUTH_TYPE=NULL";
     env_variables[13] = "REMOTE_USER=NULL";
     env_variables[14] = "REMOTE_IDENT=NULL";
-    env_variables[15] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[15], "CONTENT_TYPE=%s", sc_map_get_str(&req_i->headers, "Content-Type"));//Content Type of Request
-    env_variables[16] = malloc(ENV_BUF_SIZE);
-    sprintf(env_variables[16], "CONTENT_LENGTH=%lu", strlen(req_i->request_body));//Length of Content passed to script (body)
+    sprintf(temp, "CONTENT_TYPE=%s", sc_map_get_str(&req_i->headers, "Content-Type"));//Content Type of Request
+    strcpy(env_variables[15], temp);
+    sprintf(temp, "CONTENT_LENGTH=%lu", strlen(req_i->request_body));//Length of Content passed to script (body)
+    strcpy(env_variables[16], temp);
     env_variables[17] = NULL;
-    // size_t i = 17;
-    // uint32_t size = sc_map_size_str(&req_i->headers);
-    // sc_map_foreach(&req_i->headers, key, value) {
-    //     sprintf(env_variables[i++], "HTTP_%s=%s", key, value);
-    // }
     return 1;
 }
 
