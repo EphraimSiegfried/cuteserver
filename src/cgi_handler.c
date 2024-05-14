@@ -11,36 +11,35 @@
 #define ENV_BUF_SIZE 100
 
 int set_env(char *env_variables[], request_info *req_i) {
-    //instead of malloc, use a buffer
     char temp[ENV_BUF_SIZE];
 
     env_variables[0] = "SERVER_SOFTWARE=cuteserver/0.1";
-    env_variables[1] = "SERVER_NAME=localhost";// TODO: aus config
+    env_variables[1] = "SERVER_NAME=localhost";
     env_variables[2] = "GATEWAY_INTERFACE=CGI/1.1";
     sprintf(temp, "SERVER_PROTOCOL=%s", req_i->version);
-    strcpy(env_variables[3], temp);
+    env_variables[3] = strdup(temp);
     sprintf(temp, "SERVER_PORT=%d", 8888);
-    strcpy(env_variables[4], temp);
+    env_variables[4] = strdup(temp);
     sprintf(temp, "REQUEST_METHOD=%s", req_i->req_type);
-    strcpy(env_variables[5], temp);
+    env_variables[5] = strdup(temp);
     sprintf(temp, "PATH_INFO=%s", req_i->file_path);
-    strcpy(env_variables[6], temp);
+    env_variables[6] = strdup(temp);
     sprintf(temp, "PATH_TRANSLATED=%s", req_i->real_path);
-    strcpy(env_variables[7], temp);
-    sprintf(temp, "SCRIPT_NAME=%s", "scriptname");//TODO: get script name from path
-    strcpy(env_variables[8], temp);
+    env_variables[7] = strdup(temp);
+    sprintf(temp, "SCRIPT_NAME=%s", "scriptname");
+    env_variables[8] = strdup(temp);
     sprintf(temp, "QUERY_STRING=%s", req_i->query);
-    strcpy(env_variables[9], temp);
+    env_variables[9] = strdup(temp);
     env_variables[10] = "REMOTE_HOST=NULL";
-    sprintf(temp, "REMOTE_ADDR=%s", inet_ntoa(req_i->client_addr.sin_addr));//TODO:
-    strcpy(env_variables[11], temp);
+    sprintf(temp, "REMOTE_ADDR=%s", inet_ntoa(req_i->client_addr.sin_addr));
+    env_variables[11] = strdup(temp);
     env_variables[12] = "AUTH_TYPE=NULL";
     env_variables[13] = "REMOTE_USER=NULL";
     env_variables[14] = "REMOTE_IDENT=NULL";
-    sprintf(temp, "CONTENT_TYPE=%s", sc_map_get_str(&req_i->headers, "Content-Type"));//Content Type of Request
-    strcpy(env_variables[15], temp);
-    sprintf(temp, "CONTENT_LENGTH=%lu", strlen(req_i->request_body));//Length of Content passed to script (body)
-    strcpy(env_variables[16], temp);
+    sprintf(temp, "CONTENT_TYPE=%s", sc_map_get_str(&req_i->headers, "Content-Type"));
+    env_variables[15] = strdup(temp);
+    sprintf(temp, "CONTENT_LENGTH=%lu", strlen(req_i->request_body));
+    env_variables[16] = strdup(temp);
     env_variables[17] = NULL;
     return 1;
 }
