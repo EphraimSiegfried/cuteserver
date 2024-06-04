@@ -2,6 +2,7 @@
 #define CONFIG_H
 
 #include "../deps/hashmap/sc_map.h"
+#include <netinet/in.h>
 
 typedef struct {
     char *domain;
@@ -13,6 +14,7 @@ typedef struct {
 
 typedef struct {
     int workers;
+    in_addr_t address; 
     int port;
     resource *resources;
     struct sc_map_s64 identifier;//maps domain names to resource indices

@@ -112,10 +112,19 @@ int main(int argc, char *argv[]) {
     }
     int opt; 
     char *config_path = "./config.toml"; 
+    in_addr_t address = 0;
     int port = 0; 
     int log_level = 0; 
-    while ((opt = getopt(argc, argv, "p:l:c:")) != -1) {
+    while ((opt = getopt(argc, argv, "a:p:l:c:")) != -1) {
         switch (opt) {
+            case 'a': //address, default value = 127.0.0.1
+                address = inet_addr(optarg); //returns 0 on error
+                printf("address: %u\n", address);
+                if (address == 0) {
+                    printf("Invalid address value.\n"); 
+                    return -1; 
+                }
+                break; 
             case 'p': // port, default value = 8888
                 port = atoi(optarg);
                 if (port == 0) {
@@ -134,7 +143,7 @@ int main(int argc, char *argv[]) {
                 config_path = optarg;  
                break;
             default:   
-                fprintf(stderr, "Usage: %s [-p port] [-l log_level] [-c config_path]\nDefault values: -p 8888 -l 0 -c ./config.toml\n", argv[0]);
+                fprintf(stderr, "Usage: %s [-a address] [-p port] [-l log_level] [-c config_path]\nDefault values: -a 127.0.0.1 -p 8888 -l 0 -c ./config.toml\n", argv[0]);
                 exit(EXIT_FAILURE);
         }
     } 
@@ -143,10 +152,11 @@ int main(int argc, char *argv[]) {
         return -1; 
     }
     parse_config(config_path);
+    address = (address == 0) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : address; 
     port = (port == 0) ? (conf->port ? conf->port : 8888) : port; //NOTE: order is argument > config > default value
     log_set_level(log_level);
 
-    printf("port=%d, log_level=%d, config_path=%s\n", port, log_level, config_path); 
+    printf("address=%u port=%d, log_level=%d, config_path=%s\n",address, port, log_level, config_path); 
 
     // SERVER SOCKET
     struct sockaddr_in server_addr;
@@ -157,7 +167,7 @@ int main(int argc, char *argv[]) {
     server_addr.sin_family = AF_INET;
     // htons= host to network short
     server_addr.sin_port = htons(port);
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_addr.s_addr = address;
 
 
     if (bind(server_sock, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {

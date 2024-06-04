@@ -2,6 +2,7 @@
 #include "../deps/log/log.h"
 #include "../deps/tomlparser/toml.h"
 #include "hashmap/sc_map.h"
+#include <arpa/inet.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,6 +46,7 @@ int parse_config(char *path) {
     if (!server) handle_error("server");
 
     conf = malloc(sizeof(config));//TODO:free
+    conf->address = inet_addr(get_str("address", server)); //TODO: alloc ? 
     conf->port = get_int("port", server);
     conf->workers = get_int("workers", server);
 
