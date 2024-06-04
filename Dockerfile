@@ -1,24 +1,18 @@
-FROM alpine:3.19 AS build
+FROM gcc:9 as builder
 
-RUN apk update && apk add \
+RUN apt-get update && apt-get install -y \
     cmake \
     make \
     g++ \
     libc-dev
 
+WORKDIR /webs
+COPY CMakeLists.txt .
+COPY src/ src/
+COPY deps/ deps/
+RUN cmake . && make install
 
-COPY CMakeLists.txt /webs/ 
-COPY src/ /webs/src
-COPY deps/ /webs/deps
-
-
-COPY data/ /webs/data
-COPY config.toml /webs/config.toml
-
+FROM debian:buster
 EXPOSE 80
-# VOLUME ["/cuteserver/data", "/cuteserver/config", "/etc/apache2/external"]
-
-RUN cd /webs && cmake . && make install
-
-ENTRYPOINT [ "cuteserver 80 0 /webs/config.toml" ]
-
+COPY --from=builder /usr/local/bin /usr/local/bin
+ENTRYPOINT ["cuteserver", "-a", "0.0.0.0","-p","80", "-c", "/config.toml"]

@@ -1,0 +1,14 @@
+[server]
+    port = 8888
+    address = "123.2.1.1"
+    workers = 4
+    log-file = "./logs"
+
+[resource.cute]
+    domain = "localhost:8888"
+    root = "/content"
+    cgi_bin_dir = "/webs/content/cgi-bin"
+    [resource.cute.remaps]
+        "/clients/hello" = "clients/hello.php"
+        "/api/messages" = "/cgi-bin/main.cgi"
+        "/messages" = "/cgi-bin/main.cgi"
