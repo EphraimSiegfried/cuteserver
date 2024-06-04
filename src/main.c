@@ -7,6 +7,7 @@
 #include "utils.h"
 #include <arpa/inet.h>
 #include <limits.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/errno.h>
@@ -104,16 +105,49 @@ void cleanup() {
     exit(0);
 }
 
-
-int main(int argv, char *args[]) {
-    signal(SIGINT, cleanup);
-
-    int port = args[1] ? atoi(args[1]) : (conf->port ? conf->port : 8888);//TODO: if
-    int log_level = args[2] && atoi(args[2]) <= 5 ? atoi(args[2]) : 0;
-    char *config_path = args[3] ? args[3] : "./config.toml";
+int main(int argc, char *argv[]) {
+    if (argc > 7) {
+        fprintf(stderr, "Too many Arguments.\nUsage: %s [-p port] [-l log_level] [-c config_path]\nDefault values: -p 8888 -l 0 -c ./config.toml\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+    int opt; 
+    char *config_path = "./config.toml"; 
+    int port = 0; 
+    int log_level = 0; 
+    while ((opt = getopt(argc, argv, "p:l:c:")) != -1) {
+        switch (opt) {
+            case 'p': // port, default value = 8888
+                port = atoi(optarg);
+                if (port == 0) {
+                    printf("Invalid port value.\n"); 
+                    return -1; 
+                }
+                break; 
+            case 'l': // log-level, default value = 0
+                log_level = atoi(optarg); 
+                if (log_level > 5 || log_level < 0) {
+                    printf("Invalid log level value. Must be between 0 and 5\n"); 
+                    return -1; 
+                }
+                break; 
+            case 'c':  // config path, default value = ./config.toml
+                config_path = optarg;  
+               break;
+            default:   
+                fprintf(stderr, "Usage: %s [-p port] [-l log_level] [-c config_path]\nDefault values: -p 8888 -l 0 -c ./config.toml\n", argv[0]);
+                exit(EXIT_FAILURE);
+        }
+    } 
+    if (access(config_path, F_OK) == -1) { 
+        printf("Configuration file does not exist: %s\n", config_path);
+        return -1; 
+    }
     parse_config(config_path);
-
+    port = (port == 0) ? (conf->port ? conf->port : 8888) : port; //NOTE: order is argument > config > default value
     log_set_level(log_level);
+
+    printf("port=%d, log_level=%d, config_path=%s\n", port, log_level, config_path); 
+
     // SERVER SOCKET
     struct sockaddr_in server_addr;
 
