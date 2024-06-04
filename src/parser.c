@@ -10,7 +10,7 @@ int parse_headers(char *buf, struct sc_map_str *header_map) {
     const char *key, *value;
     char *temp_buf = buf;
     char *line;
-    while ((line = strsep(&temp_buf, "\n"))) {//TODO: find better implementation
+    while ((line = strsep(&temp_buf, "\n"))) {
         if (strcmp(line, "") == 0 || strcmp(line, " ") == 0 || strcmp(line, "\r") == 0 || strcmp(line, "\r\n") == 0) break;
         key = trim(strsep(&line, ": "));
         value = trim(line);
@@ -18,10 +18,6 @@ int parse_headers(char *buf, struct sc_map_str *header_map) {
         sc_map_put_str(header_map, key, value);
     }
 
-    // const char *keyy, *valuee;
-    // sc_map_foreach(header_map, keyy, valuee) {
-    //     log_debug("KEY: [%s] | VALUE: [%s]", keyy, valuee);
-    // }
     return temp_buf - buf;
 }
 
@@ -32,11 +28,11 @@ int parse_request_line(char *buff, int buf_length, request_info *req_i) {
     char *url = trim(strsep(&buff, " "));
     log_debug("URL:%s", url);
     req_i->file_path = trim(strsep(&url, "?"));
-    req_i->query = strsep(&url, " ");//kei whitespace...
+    req_i->query = strsep(&url, " "); //TODO: kei whitespace...
     log_debug("FILE_PATH: %s", req_i->file_path);
     log_debug("QUERY: %s", req_i->query);
 
-    //resolve real path
+    // resolve real path
     char *real_path = malloc(sizeof(char) * 1024);
     const char *mapped_path = sc_map_get_str(&conf->resources[0].remaps, req_i->file_path);
     sprintf(real_path, "%s%s", conf->resources[0].root, mapped_path ? mapped_path : req_i->file_path);

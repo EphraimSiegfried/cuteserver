@@ -8,41 +8,20 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-
 #define BUFFER_LEN 80000
-
-
-// int send_ok(int socket_fd, char *file_path) {
-//     int file_fd;
-//     long file_len;
-//     char buffer[BUFFER_LEN];
-//     char *mime = get_mime_type(file_path);
-//     if ((file_fd = open(file_path, O_RDONLY)) == -1) {//open file
-//         log_fatal("Error opening %s: %s", file_path, strerror(errno));
-//         return -1;
-//     }
-//     file_len = (long) lseek(file_fd, (off_t) 0, SEEK_END);                                                                // lseek to the file end to find the length of the file
-//     lseek(file_fd, (off_t) 0, SEEK_SET);                                                                                  // seek back to the file start ready for reading
-//     sprintf(buffer, "HTTP/1.1 200 OK\nConnection: keep-alive\nContent-Length: %ld\nContent-Type: %s\n\n", file_len, mime);// Header + a blank line
-//     write(socket_fd, buffer, strlen(buffer));
-//
-//     log_info("Sending %s over socket: %d", file_path, socket_fd);
-//     close(file_fd);
-//     return 1;
-// }
 
 int send_ok_buf(int socket_fd, char **content_buffer, char *mime, long size) {
     char response_buffer[BUFFER_LEN];
     sprintf(response_buffer, "HTTP/1.1 200 OK\nConnection: keep-alive\nContent-Length: %ld\nContent-Type: %s\n\n%s", size, mime, *content_buffer);
 
     send(socket_fd, response_buffer, strlen(response_buffer), 0);
-    log_info("Sending bufer over socket: %d", socket_fd);
+    log_info("Sending buffer over socket: %d", socket_fd);
     return 1;
 }
 int send_error(int socket_fd, short unsigned int type) {
     char content[102];
     char response[102 + 2 + 79];
-    short unsigned int content_len;//TODO
+    short unsigned int content_len; 
     sprintf(content, "\n\n<html><head>\n<title>Error %hu</title>\n</head><body>\n<img src=https://http.cat/%hu /></body></html>\n", type, type);
     content_len = strlen(content);
     sprintf(response, "HTTP/1.1 %hu\nContent-Length: %hu\nConnection: close\nContent-Type: text/html\n\n%s", type, content_len, content);
@@ -50,12 +29,11 @@ int send_error(int socket_fd, short unsigned int type) {
     write(socket_fd, response, response_len);
     log_error("Sending error: %d", type);
 
-    sleep(1);
+    sleep(1); //TODO: sleep necessary ? 
     return 1;
 }
 
 int send_response(int socket_fd, response_info *res_i, char *request_body) {
-
     // send request_body
     send(socket_fd, request_body, strlen(request_body), 0);
 

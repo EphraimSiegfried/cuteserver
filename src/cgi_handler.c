@@ -14,7 +14,7 @@ int set_env(char *env_variables[], request_info *req_i) {
     char temp[ENV_BUF_SIZE];
 
     env_variables[0] = "SERVER_SOFTWARE=cuteserver/0.1";
-    env_variables[1] = "SERVER_NAME=localhost";
+    env_variables[1] = "SERVER_NAME=localhost"; //TODO: assign correct name
     env_variables[2] = "GATEWAY_INTERFACE=CGI/1.1";
     sprintf(temp, "SERVER_PROTOCOL=%s", req_i->version);
     env_variables[3] = strdup(temp);
@@ -26,7 +26,8 @@ int set_env(char *env_variables[], request_info *req_i) {
     env_variables[6] = strdup(temp);
     sprintf(temp, "PATH_TRANSLATED=%s", req_i->real_path);
     env_variables[7] = strdup(temp);
-    sprintf(temp, "SCRIPT_NAME=%s", "scriptname");
+    char* script_name = strrchr(req_i->real_path, '/') + 1;
+    sprintf(temp, "SCRIPT_NAME=%s", script_name); 
     env_variables[8] = strdup(temp);
     sprintf(temp, "QUERY_STRING=%s", req_i->query);
     env_variables[9] = strdup(temp);
@@ -46,7 +47,8 @@ int set_env(char *env_variables[], request_info *req_i) {
 
 int run_cgi_script(request_info *req_i, char *cgi_output[]) {
     ssize_t count;
-    char *arguments[2] = {"cgi", NULL};//TODO: get name of script from path
+    char* script_name = strrchr(req_i->real_path, '/') + 1;
+    char *arguments[2] = {script_name, NULL};
 
     char *env_variables[18];
     set_env(env_variables, req_i);

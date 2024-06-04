@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
             case 'a': //address, default value = 127.0.0.2
                 inet_aton(optarg, &server_addr.sin_addr); //returns 0 on error
                 printf("address: %s\n", inet_ntoa(server_addr.sin_addr));
-//                if (server_addr.sin_addr.s_addr == 0) {
+//                if (server_addr.sin_addr.s_addr == 0) { TODO: handle errors
 //                    printf("Invalid address value.\n");
 //                    return -1;
 //                }
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
         return -1; 
     }
     parse_config(config_path);
-    // server_addr.sin_addr.s_addr = (server_addr.sin_addr.s_addr == 0) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : server_addr.sin_addr.s_addr;
+    // server_addr.sin_addr.s_addr = (server_addr.sin_addr.s_addr == 0) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : server_addr.sin_addr.s_addr; TODO: handle (0 check doesn't work bc of address 0.0.0.0)
     port = (port == 0) ? (conf->port ? conf->port : 8888) : port; //NOTE: order is argument > config > default value
     log_set_level(log_level);
 

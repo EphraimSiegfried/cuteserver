@@ -1,4 +1,3 @@
-//https://stackoverflow.com/questions/122616/how-do-i-trim-leading-trailing-whitespace-in-a-standard-way
 #include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
