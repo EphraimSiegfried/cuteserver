@@ -106,24 +106,26 @@ void cleanup() {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc > 7) {
-        fprintf(stderr, "Too many Arguments.\nUsage: %s [-p port] [-l log_level] [-c config_path]\nDefault values: -p 8888 -l 0 -c ./config.toml\n", argv[0]);
+    if (argc > 9) {
+        fprintf(stderr, "Too many Arguments.\nUsage: %s [-a address] [-p port] [-l log_level] [-c config_path]\nDefault values: -a 127.0.0.1 -p 8888 -l 0 -c ./config.toml\n", argv[0]);
         exit(EXIT_FAILURE);
     }
     int opt; 
     char *config_path = "./config.toml"; 
-    in_addr_t address = 0;
+    // SERVER SOCKET
+    struct sockaddr_in server_addr;
+    server_addr.sin_addr.s_addr = 0; // default address
     int port = 0; 
     int log_level = 0; 
     while ((opt = getopt(argc, argv, "a:p:l:c:")) != -1) {
         switch (opt) {
-            case 'a': //address, default value = 127.0.0.1
-                address = inet_addr(optarg); //returns 0 on error
-                printf("address: %u\n", address);
-                if (address == 0) {
-                    printf("Invalid address value.\n"); 
-                    return -1; 
-                }
+            case 'a': //address, default value = 127.0.0.2
+                inet_aton(optarg, &server_addr.sin_addr); //returns 0 on error
+                printf("address: %s\n", inet_ntoa(server_addr.sin_addr));
+//                if (server_addr.sin_addr.s_addr == 0) {
+//                    printf("Invalid address value.\n");
+//                    return -1;
+//                }
                 break; 
             case 'p': // port, default value = 8888
                 port = atoi(optarg);
@@ -152,23 +154,17 @@ int main(int argc, char *argv[]) {
         return -1; 
     }
     parse_config(config_path);
-    address = (address == 0) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : address; 
+    // server_addr.sin_addr.s_addr = (server_addr.sin_addr.s_addr == 0) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : server_addr.sin_addr.s_addr;
     port = (port == 0) ? (conf->port ? conf->port : 8888) : port; //NOTE: order is argument > config > default value
     log_set_level(log_level);
 
-    printf("address=%u port=%d, log_level=%d, config_path=%s\n",address, port, log_level, config_path); 
-
-    // SERVER SOCKET
-    struct sockaddr_in server_addr;
+    printf("address=%s port=%d, log_level=%d, config_path=%s\n",inet_ntoa(server_addr.sin_addr), port, log_level, config_path); 
 
     // PF_INET= ipv4, SOCK_STREAM=tcp
     server_sock = socket(PF_INET, SOCK_STREAM, 0);
-
     server_addr.sin_family = AF_INET;
     // htons= host to network short
     server_addr.sin_port = htons(port);
-    server_addr.sin_addr.s_addr = address;
-
 
     if (bind(server_sock, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
         log_fatal("Binding error: %s", strerror(errno));
