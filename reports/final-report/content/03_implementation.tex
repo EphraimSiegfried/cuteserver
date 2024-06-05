@@ -1,9 +1,14 @@
 \section*{Implementation}
 
-\subsection*{Development Environment}
-% Iterative Approach (Start with a simple GET request and then everything else). 
-% Program setup: cmake, ... 
-% Development environment: tmate / sshx  
+\subsection*{Development Environment} 
+% TODO: add links
+The development of Cuteserver was primarily accomplished through pair programming. We held regular meetings where we shared our terminals using a shell sharing tool called sshx. This tool was particularly effective for collaboration since we both used Neovim as our code editor. \\
+
+The implementation of cuteserver was mainly done by pair programming. We regulary had meetings where we shared our terminals with a shell sharing tool called sshx. This tool was particularly useful for working together as we both use Neovim as a code editor which is terminal based. \\ %NOTE: ignore this part ?
+
+Initially, we used Makefiles to build the source code, but this approach was inefficient due to frequent adjustments. As the project grew more complex, we decided to use CMake for more efficient project building and file generation. \\
+
+Our implementation strategy for the web server was iterative, starting with small, manageable tasks and progressively tackling more complex ones. We regularly tested the code by running it with different inputs to ensure functionality.
 
 
 \subsection*{Project Structure} % (also dasmer de tree zeige und kurz erkläre welles file für was isch)
@@ -23,9 +28,13 @@
 % TOML File 
 % Dockerfile  (readme für apps erstellen (dockerfiles))
 
+
+\subsection*{Example Application}
+% TODO: synchronization 
+
+
 \subsection*{Containerization}
 % Docker 
 % Multistage build 
 
-\subsection*{Example Application}
-% TODO: synchronization 
+We decided to containerize our application for two main reasons. Initially, we used chroot jails to sandbox our application, i.e., a mechanism that isolates a process and its children from the rest of the system by changing their apparent root directory to a specified path. This approach worked until we implemented CGI support, which required the web server to start new processes with the necessary libraries for the CGI scripts. Manually copying those dependencies into the chroot jail would have been too laborious. Docker containers offered an easier solution by securely sandboxing execution and including dependencies. Additionally, Dockerfiles enabled us to automate the building of the web server and the example application, making it easy to use and run. We utilized multistage builds, first creating containers for building and then copying only the necessary files to the final containers. Multistage build reduced the container size from 1.2 GB to approximately 200 MB. This process enhanced our understanding of containerization.
