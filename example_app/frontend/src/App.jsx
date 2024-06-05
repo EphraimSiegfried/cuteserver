@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import kitty1 from "./assets/kitty1.jpg";
-import kitty2 from "./assets/kitty2.jpg";
+import rat from "./assets/rat.jpg";
 
 function App() {
     const [name, setName] = useState("");
@@ -9,6 +9,7 @@ function App() {
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState("");
     const [data, setData] = useState([]);
+    const POLLING_INTERVAL = 2000;
 
     useEffect(() => {
         // Fetch messages when the component mounts
@@ -22,8 +23,11 @@ function App() {
                 setFormError(error.toString());
             }
         };
+        const intervalId = setInterval(() => {
+            fetchMessages();
+        }, POLLING_INTERVAL);
 
-        fetchMessages();
+        return () => clearInterval(intervalId);
     }, []);
 
     const onFormSubmit = async (e) => {
@@ -88,7 +92,7 @@ function App() {
                 </button>
             </form>
             <img src={kitty1} height={500} />
-            <img src={kitty2} height={300} className="rotate" />
+            <img src={rat} height={300} className="rotate" />
         </>
     );
 }
