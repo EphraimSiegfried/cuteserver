@@ -19,5 +19,5 @@ docker run -p 8888:80 kitty_chat
 Or just run
 
 ```bash
-./run.sh
+bash run.sh
 ```
