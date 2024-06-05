@@ -15,11 +15,8 @@ COPY backend/CMakeLists.txt .
 COPY backend/main.c .
 RUN cmake . && make
 
+# Final stage
 FROM cutie
-
-RUN set -ex;         \
-    apt-get update;  \
-    apt-get install -y libjson-c-dev
 
 WORKDIR /content
 COPY config.toml /
