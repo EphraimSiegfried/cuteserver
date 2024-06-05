@@ -27,6 +27,7 @@ Our implementation strategy for the web server was iterative, starting with smal
 % Our goal was to provide a web server that needs minimal configuration. Therefore we put everything into 1 config file. 
 % TOML File 
 % Dockerfile  (readme für apps erstellen (dockerfiles))
+From the beginning, we aimed for our web server to support hosting multiple resources connected to different domain names. To achieve this multidomain support, we needed to make the web server configurable. To ensure user-friendly configuration, we used TOML files. The web server parses a configuration file listing all resources and their locations for the server to serve. Additionally, users can specify resource-independent settings, such as the number of active worker threads and log storage locations. We also provide a command line interface where users can specify the TCP address and the path to the configuration file.
 
 
 \subsection*{Example Application}
