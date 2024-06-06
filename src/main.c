@@ -7,7 +7,6 @@
 #include "utils.h"
 #include <arpa/inet.h>
 #include <limits.h>
-#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/errno.h>
@@ -18,7 +17,6 @@
 
 #define MAX_BUF_SIZE 8122
 #define MAX_PENDING 21
-
 
 typedef struct {
     int client_socket;
@@ -106,27 +104,24 @@ void cleanup() {
 }
 
 int main(int argc, char *argv[]) {
+    // HANDLE COMMAND LINE ARGUMENTS
     if (argc > 9) {
         fprintf(stderr, "Too many Arguments.\nUsage: %s [-a address] [-p port] [-l log_level] [-c config_path]\nDefault values: -a 127.0.0.1 -p 8888 -l 0 -c ./config.toml\n", argv[0]);
         exit(EXIT_FAILURE);
     }
     int opt; 
     char *config_path = "./config.toml"; 
-    // SERVER SOCKET
     struct sockaddr_in server_addr;
-    server_addr.sin_addr.s_addr = 0; // default address
     int port = 0; 
     int log_level = 0; 
     while ((opt = getopt(argc, argv, "a:p:l:c:")) != -1) {
         switch (opt) {
-            case 'a': //address, default value = 127.0.0.2
-                inet_aton(optarg, &server_addr.sin_addr); //returns 0 on error
-                printf("address: %s\n", inet_ntoa(server_addr.sin_addr));
-//                if (server_addr.sin_addr.s_addr == 0) { TODO: handle errors
-//                    printf("Invalid address value.\n");
-//                    return -1;
-//                }
-                break; 
+            case 'a': //address, default value = 127.0.0.1
+                if (inet_aton(optarg, &server_addr.sin_addr) == 0) { //returns 0 on error
+                    printf("Invalid address value.\n");
+                    return -1;
+                }
+                break;
             case 'p': // port, default value = 8888
                 port = atoi(optarg);
                 if (port == 0) {
@@ -153,13 +148,15 @@ int main(int argc, char *argv[]) {
         printf("Configuration file does not exist: %s\n", config_path);
         return -1; 
     }
+    // printf("address=%s port=%d, log_level=%d, config_path=%s\n",inet_ntoa(server_addr.sin_addr), port, log_level, config_path);
     parse_config(config_path);
-    // server_addr.sin_addr.s_addr = (server_addr.sin_addr.s_addr == 0) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : server_addr.sin_addr.s_addr; TODO: handle (0 check doesn't work bc of address 0.0.0.0)
+//    server_addr.sin_addr.s_addr = (server_addr.sin_addr.s_addr == NULL) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : server_addr.sin_addr.s_addr; //TODO: handle (0 check doesn't work bc of address 0.0.0.0)
     port = (port == 0) ? (conf->port ? conf->port : 8888) : port; //NOTE: order is argument > config > default value
     log_set_level(log_level);
 
-    printf("address=%s port=%d, log_level=%d, config_path=%s\n",inet_ntoa(server_addr.sin_addr), port, log_level, config_path); 
+    printf("address=%s port=%d, log_level=%d, config_path=%s\n", inet_ntoa(server_addr.sin_addr), port, log_level, config_path); 
 
+    // SERVER SOCKET 
     // PF_INET= ipv4, SOCK_STREAM=tcp
     server_sock = socket(PF_INET, SOCK_STREAM, 0);
     server_addr.sin_family = AF_INET;
@@ -178,14 +175,12 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    thpool = thpool_init(8);
+    thpool = thpool_init(conf->workers); //TODO: what if conf-->workers undefined? 
 
     while (1) {
         client_socket_info *client_sock_i = malloc(sizeof(client_socket_info));
         unsigned int client_addr_len = sizeof(client_sock_i->client_address);
-        // log_debug("%d", thpool_num_threads_working(thpool));
         client_sock_i->client_socket = accept(server_sock, (struct sockaddr *) &client_sock_i->client_address, &client_addr_len);
-
 
         log_debug("Created sock: %d", client_sock_i->client_socket);
         if (client_sock_i->client_socket < 0) {
