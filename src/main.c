@@ -30,6 +30,13 @@ void serve(void *client_info) {
     const char *connection;
     int recvd_bytes, rl_len, hdr_len;
     bool keep_alive = true;
+    struct timeval tv;
+
+    // we tell the client that the socket is open for 5 sec
+    // but we make it actually a little longer, 7 sec
+    tv.tv_sec = 7;
+    tv.tv_usec = 0;
+    setsockopt(*client_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv, sizeof tv);
 
     do {
         memset(buff, 0, sizeof(buff));
@@ -37,11 +44,11 @@ void serve(void *client_info) {
         request_info *req_i = &req_info;
         req_i->client_addr = client_sock_i->client_address;
 
-        if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) <= 0) {
+        if ((recvd_bytes = recv(*client_socket, buff, sizeof(buff), 0)) < 0) {
             log_error("%s %d", strerror(errno), *client_socket);
             break;
         }
-        //log_debug(buff);
+        if (!recvd_bytes) break;// client has closed the connection
 
         if ((rl_len = parse_request_line(buff, recvd_bytes, req_i)) < 0) {
             send_error(*client_socket, BADREQUEST);
@@ -109,54 +116,54 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Too many Arguments.\nUsage: %s [-a address] [-p port] [-l log_level] [-c config_path]\nDefault values: -a 127.0.0.1 -p 8888 -l 0 -c ./config.toml\n", argv[0]);
         exit(EXIT_FAILURE);
     }
-    int opt; 
-    char *config_path = "./config.toml"; 
+    int opt;
+    char *config_path = "./config.toml";
     struct sockaddr_in server_addr;
-    int port = 0; 
-    int log_level = 0; 
+    int port = 0;
+    int log_level = 0;
     while ((opt = getopt(argc, argv, "a:p:l:c:")) != -1) {
         switch (opt) {
-            case 'a': //address, default value = 127.0.0.1
-                if (inet_aton(optarg, &server_addr.sin_addr) == 0) { //returns 0 on error
+            case 'a':                                               //address, default value = 127.0.0.1
+                if (inet_aton(optarg, &server_addr.sin_addr) == 0) {//returns 0 on error
                     printf("Invalid address value.\n");
                     return -1;
                 }
                 break;
-            case 'p': // port, default value = 8888
+            case 'p':// port, default value = 8888
                 port = atoi(optarg);
                 if (port == 0) {
-                    printf("Invalid port value.\n"); 
-                    return -1; 
+                    printf("Invalid port value.\n");
+                    return -1;
                 }
-                break; 
-            case 'l': // log-level, default value = 0
-                log_level = atoi(optarg); 
+                break;
+            case 'l':// log-level, default value = 0
+                log_level = atoi(optarg);
                 if (log_level > 5 || log_level < 0) {
-                    printf("Invalid log level value. Must be between 0 and 5\n"); 
-                    return -1; 
+                    printf("Invalid log level value. Must be between 0 and 5\n");
+                    return -1;
                 }
-                break; 
-            case 'c':  // config path, default value = ./config.toml
-                config_path = optarg;  
-               break;
-            default:   
+                break;
+            case 'c':// config path, default value = ./config.toml
+                config_path = optarg;
+                break;
+            default:
                 fprintf(stderr, "Usage: %s [-a address] [-p port] [-l log_level] [-c config_path]\nDefault values: -a 127.0.0.1 -p 8888 -l 0 -c ./config.toml\n", argv[0]);
                 exit(EXIT_FAILURE);
         }
-    } 
-    if (access(config_path, F_OK) == -1) { 
+    }
+    if (access(config_path, F_OK) == -1) {
         printf("Configuration file does not exist: %s\n", config_path);
-        return -1; 
+        return -1;
     }
     // printf("address=%s port=%d, log_level=%d, config_path=%s\n",inet_ntoa(server_addr.sin_addr), port, log_level, config_path);
     parse_config(config_path);
-//    server_addr.sin_addr.s_addr = (server_addr.sin_addr.s_addr == NULL) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : server_addr.sin_addr.s_addr; //TODO: handle (0 check doesn't work bc of address 0.0.0.0)
-    port = (port == 0) ? (conf->port ? conf->port : 8888) : port; //NOTE: order is argument > config > default value
+    //    server_addr.sin_addr.s_addr = (server_addr.sin_addr.s_addr == NULL) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : server_addr.sin_addr.s_addr; //TODO: handle (0 check doesn't work bc of address 0.0.0.0)
+    port = (port == 0) ? (conf->port ? conf->port : 8888) : port;//NOTE: order is argument > config > default value
     log_set_level(log_level);
 
-    printf("address=%s port=%d, log_level=%d, config_path=%s\n", inet_ntoa(server_addr.sin_addr), port, log_level, config_path); 
+    printf("address=%s port=%d, log_level=%d, config_path=%s\n", inet_ntoa(server_addr.sin_addr), port, log_level, config_path);
 
-    // SERVER SOCKET 
+    // SERVER SOCKET
     // PF_INET= ipv4, SOCK_STREAM=tcp
     server_sock = socket(PF_INET, SOCK_STREAM, 0);
     server_addr.sin_family = AF_INET;
@@ -175,7 +182,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    thpool = thpool_init(conf->workers); //TODO: what if conf-->workers undefined? 
+    thpool = thpool_init(conf->workers);//TODO: what if conf-->workers undefined?
 
     while (1) {
         client_socket_info *client_sock_i = malloc(sizeof(client_socket_info));

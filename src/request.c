@@ -56,7 +56,8 @@ int handle_dynamic_request(int *sock, request_info *req_i) {
     response_i.req_type = req_i->req_type;
     sc_map_init_str(&response_i.headers, 0, 0);
     sc_map_put_str(&response_i.headers, "Content-Type", "text/html");//default value, gets overwritten by cgi-script
-    sc_map_put_str(&response_i.headers, "Connection", "keep-alive");
+    sc_map_put_str(&response_i.headers, "Connection", "Keep-Alive");
+    sc_map_put_str(&response_i.headers, "Keep-Alive", "timeout=5");
     int hdr_len = parse_headers(cgi_output, &response_i.headers);
     log_info("cgi_output: %d und hdr_len: %d", cgi_output_len, hdr_len);
     char *content = cgi_output + hdr_len;
@@ -102,7 +103,8 @@ int handle_static_request(int *client_socket, request_info *req_i) {
     sprintf(file_len_str, "%ld", file_len);
     sc_map_put_str(&response_i.headers, "Content-Length", file_len_str);
     sc_map_put_str(&response_i.headers, "Content-Type", get_mime_type(req_i->real_path));
-    sc_map_put_str(&response_i.headers, "Connection", "keep-alive");
+    sc_map_put_str(&response_i.headers, "Connection", "Keep-Alive");
+    sc_map_put_str(&response_i.headers, "Keep-Alive", "timeout=5");
 
     send_request_info(*client_socket, &response_i);
 
