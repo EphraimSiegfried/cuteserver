@@ -103,7 +103,6 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
 
             // If the buffer is full, increase its size
             if (total_bytes_read >= buffer_size) {
-                log_info("allocate more space");
                 buffer_size *= 2;// Double the buffer size
                 char *new_cgi_output = realloc(*cgi_output, buffer_size);
                 if (new_cgi_output == NULL) {
@@ -114,8 +113,7 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
                 }
                 *cgi_output = new_cgi_output;
             } else {
-                log_info("breakkkk");
-                break;
+                break; //TODO: find better solution
             }
         }
 

@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    thpool = thpool_init(conf->workers);//TODO: what if conf-->workers undefined?
+    thpool = thpool_init(conf->workers); 
 
     while (1) {
         client_socket_info *client_sock_i = malloc(sizeof(client_socket_info));
