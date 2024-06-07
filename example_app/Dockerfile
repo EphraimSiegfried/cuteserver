@@ -19,7 +19,7 @@ RUN cmake . && make
 FROM cutie
 
 WORKDIR /content
-COPY config.toml /
+COPY config.toml /content/
 COPY --from=node-build /app/frontend/dist/ .
 COPY --from=cmake-build /app/backend/main.cgi ./cgi-bin/
 
