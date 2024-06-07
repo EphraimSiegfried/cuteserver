@@ -43,8 +43,7 @@ char *get_mime_type(char *file_path) {
 }
 
 int handle_dynamic_request(int *sock, request_info *req_i) {
-    char *cgi_output = malloc(sizeof(char) * 5000);
-    if (cgi_output == NULL) return -1;
+    char *cgi_output = NULL;
     int cgi_output_len = run_cgi_script(req_i, &cgi_output);
 
     response_info response_i;
