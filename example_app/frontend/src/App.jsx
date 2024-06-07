@@ -12,23 +12,29 @@ function App() {
     const POLLING_INTERVAL = 2000;
 
     useEffect(() => {
-        // Fetch messages when the component mounts
+        // Fetch messages when the component mounts and on every interval
         const fetchMessages = async () => {
             try {
-                const response = await fetch("/api/messages");
+                const startIndex = data.length + 1;
+                const response = await fetch(
+                    `/api/messages?startIndex=${startIndex}`,
+                );
                 if (!response.ok) throw new Error("Failed to fetch");
-                const messages = await response.json();
-                setData(messages);
+                const newMessages = await response.json();
+                setData((prevData) => [...prevData, ...newMessages]);
             } catch (error) {
                 setFormError(error.toString());
             }
         };
+
+        fetchMessages(); // Initial fetch
+
         const intervalId = setInterval(() => {
             fetchMessages();
         }, POLLING_INTERVAL);
 
         return () => clearInterval(intervalId);
-    }, []);
+    }, [data.length]);
 
     const onFormSubmit = async (e) => {
         e.preventDefault();
