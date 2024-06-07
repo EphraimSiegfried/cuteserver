@@ -4,7 +4,7 @@ WORKDIR /app/frontend
 COPY frontend/package.json .
 COPY frontend/package-lock.json .
 RUN npm install
-COPY /frontend/ .
+COPY frontend/ .
 RUN npm run build
 
 # Setup backend
