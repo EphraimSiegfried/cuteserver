@@ -51,7 +51,7 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
     ssize_t count;
     char *script_name = strrchr(req_i->real_path, '/') + 1;
     char *arguments[2] = {script_name, NULL};
-    size_t buffer_size = 2000;
+    size_t buffer_size = 100;
     size_t total_bytes_read = 0;
 
     char *env_variables[18];
@@ -95,14 +95,15 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
             close(stdout_pipe[0]);
             return -1;
         }
-        while ((count = read(stdout_pipe[0], *cgi_output + total_bytes_read, buffer_size - total_bytes_read - 1)) > 0) {
+        while ((count = read(stdout_pipe[0], *cgi_output + total_bytes_read, buffer_size - total_bytes_read)) > 0) {
             total_bytes_read += count;
             log_info("bytes read: %d", total_bytes_read);
             log_info("count: %d", count);
-            log_info("buffer: %s", *cgi_output);
+            // log_info("buffer: %s", *cgi_output);
 
             // If the buffer is full, increase its size
-            if (total_bytes_read >= buffer_size - 1) {
+            if (total_bytes_read >= buffer_size) {
+                log_info("allocate more space");
                 buffer_size *= 2;// Double the buffer size
                 char *new_cgi_output = realloc(*cgi_output, buffer_size);
                 if (new_cgi_output == NULL) {
@@ -112,6 +113,9 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
                     return -1;
                 }
                 *cgi_output = new_cgi_output;
+            } else {
+                log_info("breakkkk");
+                break;
             }
         }
 
@@ -121,7 +125,7 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
             close(stdout_pipe[0]);
             return -1;
         }
-        (*cgi_output)[count] = '\0';// Null-terminate the string
+        (*cgi_output)[total_bytes_read] = '\0';// Null-terminate the string
         close(stdout_pipe[0]);
 
         // Wait for the child to finish
@@ -132,5 +136,5 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
         return -1;
     }
 
-    return count;
+    return total_bytes_read;
 }
