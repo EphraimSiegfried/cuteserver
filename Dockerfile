@@ -19,8 +19,8 @@ FROM debian:buster
 # install tini for handling control-c
 RUN apt-get update && apt-get install -y tini
 
-EXPOSE 80
+EXPOSE 8888
 
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-ENTRYPOINT ["/usr/bin/tini", "--", "cuteserver", "-a", "0.0.0.0", "-p", "80", "-c", "/config.toml"]
+ENTRYPOINT ["/usr/bin/tini", "--", "cuteserver", "-a", "0.0.0.0", "-p", "8888", "-c", "/config.toml"]
