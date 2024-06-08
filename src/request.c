@@ -11,6 +11,10 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+
+char *get_mime_type(char *file_path);
+void set_default_headers(request_info *req_i, response_info *response_i);
+
 struct {
     char *ext;
     char *mime;
@@ -32,15 +36,6 @@ struct {
         {"svg", "image/svg+xml"},
         {0, 0}};
 
-char *get_mime_type(char *file_path) {
-    char *extension_p = strrchr(file_path, '.') + 1;
-    for (int i = 0; extensions[i].ext != 0; i++) {
-        if (strcmp(extension_p, extensions[i].ext) == 0) {
-            return extensions[i].mime;
-        }
-    }
-    return "/du failsch ";
-}
 
 int handle_dynamic_request(int *sock, request_info *req_i) {
     char *cgi_output = NULL;
@@ -56,8 +51,7 @@ int handle_dynamic_request(int *sock, request_info *req_i) {
     response_i.req_type = req_i->req_type;
     sc_map_init_str(&response_i.headers, 0, 0);
     sc_map_put_str(&response_i.headers, "Content-Type", "text/html");//default value, gets overwritten by cgi-script
-    sc_map_put_str(&response_i.headers, "Connection", "Keep-Alive");
-    sc_map_put_str(&response_i.headers, "Keep-Alive", "timeout=5");
+    set_default_headers(req_i, &response_i);
     int hdr_len = parse_headers(cgi_output, &response_i.headers);
     log_info("cgi_output: %d und hdr_len: %d", cgi_output_len, hdr_len);
     char *content = cgi_output + hdr_len;
@@ -103,8 +97,7 @@ int handle_static_request(int *client_socket, request_info *req_i) {
     sprintf(file_len_str, "%ld", file_len);
     sc_map_put_str(&response_i.headers, "Content-Length", file_len_str);
     sc_map_put_str(&response_i.headers, "Content-Type", get_mime_type(req_i->real_path));
-    sc_map_put_str(&response_i.headers, "Connection", "Keep-Alive");
-    sc_map_put_str(&response_i.headers, "Keep-Alive", "timeout=5");
+    set_default_headers(req_i, &response_i);
 
     send_request_info(*client_socket, &response_i);
 
@@ -114,4 +107,24 @@ int handle_static_request(int *client_socket, request_info *req_i) {
     close(file_fd);
 
     return 1;
+}
+
+char *get_mime_type(char *file_path) {
+    char *extension_p = strrchr(file_path, '.') + 1;
+    for (int i = 0; extensions[i].ext != 0; i++) {
+        if (strcmp(extension_p, extensions[i].ext) == 0) {
+            return extensions[i].mime;
+        }
+    }
+    return "/du failsch ";
+}
+void set_default_headers(request_info *req_i, response_info *response_i) {
+    const char *connection = sc_map_get_str(&req_i->headers, "Connection");
+
+    if (connection && strcasecmp(connection, "keep-alive") != 0) {
+        sc_map_put_str(&response_i->headers, "Connection", "close");
+    } else {
+        sc_map_put_str(&response_i->headers, "Connection", "Keep-Alive");
+        sc_map_put_str(&response_i->headers, "Keep-Alive", "timeout=3");
+    }
 }
