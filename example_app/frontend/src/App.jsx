@@ -9,7 +9,7 @@ function App() {
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState("");
     const [data, setData] = useState([]);
-    const POLLING_INTERVAL = 4000;
+    const POLLING_INTERVAL = 40000;
 
     useEffect(() => {
         // Fetch messages when the component mounts and on every interval
