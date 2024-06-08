@@ -49,6 +49,7 @@ void serve(void *client_info) {
             break;
         }
         if (!recvd_bytes) break;// client has closed the connection
+        printf("BUFF: %s END\n", buff);
 
         if ((rl_len = parse_request_line(buff, recvd_bytes, req_i)) < 0) {
             send_error(*client_socket, BADREQUEST);
