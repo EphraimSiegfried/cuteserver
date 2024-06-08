@@ -86,6 +86,7 @@ void serve(void *client_info) {
 
         int return_val;
         if (ends_with("cgi", req_i->real_path)) {
+            log_debug("REQ_I BODY: %s", req_i->request_body)
             return_val = handle_dynamic_request(client_socket, req_i);
         } else {
             return_val = handle_static_request(client_socket, req_i);
