@@ -12,6 +12,8 @@ FROM gcc:9 as cmake-build
 WORKDIR /app/backend
 RUN apt-get update && apt-get install -y cmake libjson-c-dev
 COPY backend/CMakeLists.txt .
+COPY backend/first.c .
+RUN gcc -o first.cgi first.c
 COPY backend/main.c .
 RUN cmake . && make
 
@@ -22,4 +24,5 @@ WORKDIR /content
 COPY config.toml /
 COPY --from=node-build /app/frontend/dist/ .
 COPY --from=cmake-build /app/backend/main.cgi ./cgi-bin/
+COPY --from=cmake-build /app/backend/first.cgi ./cgi-bin/
 

@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 
-#define ENV_BUF_SIZE 100
+#define ENV_BUF_SIZE 300
 
 int set_env(char *env_variables[], request_info *req_i) {
     char temp[ENV_BUF_SIZE];
@@ -33,7 +33,10 @@ int set_env(char *env_variables[], request_info *req_i) {
     env_variables[8] = strdup(temp);
     sprintf(temp, "QUERY_STRING=%s", req_i->query);
     env_variables[9] = strdup(temp);
-    env_variables[10] = "REMOTE_HOST=NULL";
+    char hostname[256]; 
+    gethostname(hostname, sizeof(hostname));
+    sprintf(temp, "REMOTE_HOST=%s", hostname);
+    env_variables[10] = strdup(temp);
     sprintf(temp, "REMOTE_ADDR=%s", inet_ntoa(req_i->client_addr.sin_addr));
     env_variables[11] = strdup(temp);
     env_variables[12] = "AUTH_TYPE=NULL";
