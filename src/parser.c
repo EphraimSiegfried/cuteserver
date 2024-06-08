@@ -44,7 +44,7 @@ int parse_request_line(char *buff, int buf_length, request_info *req_i) {
     if (!req_i->req_type || !req_i->file_path || !req_i->version) return -1;
     log_info("%s %s %s", req_i->req_type, req_i->file_path, req_i->version);
 
-    return buff - original_buff;//TODO: return error if this number is too big
+    return buff - original_buff;
 }
 
 int resolve_real_path(request_info *req_i) {

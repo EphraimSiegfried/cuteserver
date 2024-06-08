@@ -1,4 +1,3 @@
-
 #include "request.h"
 #include "../deps/log/log.h"
 #include "cgi_handler.h"

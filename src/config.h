@@ -7,7 +7,6 @@
 typedef struct {
     char *domain;
     char *root;
-    char *logs; //TODO: remove
     char *cgi_bin_dir;
     struct sc_map_str remaps;
 } resource;
