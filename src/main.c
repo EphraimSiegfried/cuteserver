@@ -15,7 +15,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define MAX_BUF_SIZE 8122
+#define MAX_BUF_SIZE 20000
 #define MAX_PENDING 21
 
 typedef struct {
