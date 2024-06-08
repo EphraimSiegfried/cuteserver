@@ -1,7 +1,7 @@
 [server]
     port = 8888
     address = "123.2.1.1"
-    workers = 4
+    workers = 15
     log_file = "./logs"
 
 [resource.cute]
