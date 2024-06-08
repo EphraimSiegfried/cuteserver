@@ -46,9 +46,10 @@ int parse_config(char *path) {
     if (!server) handle_error("server");
 
     conf = malloc(sizeof(config));//TODO:free
-    conf->address = inet_addr(get_str("address", server)); //TODO: alloc ? 
+    conf->address = inet_addr(get_str("address", server)); 
     conf->port = get_int("port", server);
     conf->workers = get_int("workers", server);
+    conf->log_file = get_str("log_file", server); 
 
     toml_table_t *resources = toml_table_in(toml, "resource");
     if (!resources) handle_error("cute resource");

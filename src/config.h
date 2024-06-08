@@ -7,7 +7,7 @@
 typedef struct {
     char *domain;
     char *root;
-    char *logs;
+    char *logs; //TODO: remove
     char *cgi_bin_dir;
     struct sc_map_str remaps;
 } resource;
@@ -17,6 +17,7 @@ typedef struct {
     in_addr_t address; 
     int port;
     resource *resources;
+    char *log_file; 
     struct sc_map_s64 identifier;//maps domain names to resource indices
 } config;
 
