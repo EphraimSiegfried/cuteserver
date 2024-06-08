@@ -8,19 +8,26 @@ Initially, we used \textbf{Makefiles} to build the source code, but this approac
 Our implementation strategy for the web server was iterative, starting with small, manageable tasks and progressively tackling more complex ones. We regularly tested the code by running it with different inputs to ensure functionality.
 
 \subsection*{Project Structure} 
-We structured our code into modules, each handling a task or describing a logical "unit". In the \textbf{main} module the server socket is set up and incoming TCP connections are handled through a threadpool. When a new request is received, a thread starts serving the incoming request. Our implementation supports Connection-Headers. Per default a "keep-alive"-Connection is assumed, so multiple responses can be sent over one TCP connection. The connection is kept alive until ... 
-%TODO: besser ausführen, add picture of keep-alive 
+We structured our code into modules, each handling a task or describing a logical "unit". In the \textbf{main} module the server socket is set up and incoming TCP connections are handled through a threadpool. When a new request is received, a thread starts serving the incoming request. Our implementation supports Keep-Alive Headers. Per default a "keep-alive"-Connection is assumed, so multiple responses can be sent over one TCP connection. (See Results). To prevent too many idle connections, a timeout of 5 Seconds is set. 
+%TODO: See Results
+%NOTE: Server waits for 7s though.  
 %TODO: error codes, kätzli
 
 \subsection*{Static File Requests}
-Each incoming request is parsed into request line, headers and body, and saved in a struct called request\_info. We differentiate between static (GET or HEAD) and dynamic (GET or POST) \footnote{TODO: can GET be a dynamic request ???} requests. \\
-
+Each incoming request is parsed into request line, headers and body, and saved in a struct called request\_info. We differentiate between static (GET or HEAD) and dynamic (GET or POST) requests. 
 For static requests, we access the file to receive metadata such as content length and type. For HEAD-Requests only the Headers are sent, for GET-Requests the file is also sent.  
 
 \subsection*{CGI}
-Dynamic Request are handled with CGI. This means the incoming request is parsed, then passed to the \textbf{CGI handler}. The CGI Protocol defines "meta-variables" \footnote{https://datatracker.ietf.org/doc/html/rfc3875#section-4.1} which have to be passed from server to CGI script using environment variables. \\
+Dynamic Request are handled with CGI. This means the incoming request is parsed, then passed to the \textbf{CGI handler} which creates a new process running the corresponding cgi script. The CGI Protocol defines "meta-variables" \footnote{https://datatracker.ietf.org/doc/html/rfc3875#section-4.1} which have to be passed from server to CGI script using environment variables. \\
 
-A new process is started with the \textbf{execve} function. Data flows between child and parents by using pipes. %TODO: explain pipes 
+The CGI process is started using the \textbf{execve} function, allowing us to pass the environment variables as an argument. Additional data has to be passed to the child process through standard in/output. 
+Communication between cgi process and server (parent process) is enabled through pipes. A pair of pipe descriptors is created before the child process is forked. Then, the child's descriptors are redirected to standard input and standard output \footnote{http://www.fmc-modeling.org/category/projects/apache/amp/A\_4\_Pipes.html, \\ and http://www.unixwiz.net/techtips/remap-pipe-fds.html } (See Figure 3).
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\textwidth]{figures/Pipes_BD.pdf}
+	\caption{Pipe Redirection} %QUELLE http://www.fmc-modeling.org/category/projects/apache/amp/A_4_Pipes.html
+\end{figure}
 
 \subsection*{Server Configuration}
 From the beginning, we aimed for our web server to support hosting multiple resources connected to different domain names. To achieve this multidomain support, we needed to make the web server configurable. To ensure user-friendly configuration, we used \textbf{TOML} \footnote{https://toml.io/en/} files. The web server parses a configuration file listing all resources and their locations for the server to serve. Additionally, users can specify resource-independent settings, such as the number of active worker threads and log storage locations. We also provide a command line interface where users can specify the TCP address and the path to the configuration file.

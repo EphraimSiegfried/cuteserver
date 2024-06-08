@@ -159,9 +159,14 @@ int main(int argc, char *argv[]) {
     }
     // printf("address=%s port=%d, log_level=%d, config_path=%s\n",inet_ntoa(server_addr.sin_addr), port, log_level, config_path);
     parse_config(config_path);
-    //    server_addr.sin_addr.s_addr = (server_addr.sin_addr.s_addr == NULL) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : server_addr.sin_addr.s_addr; //TODO: handle (0 check doesn't work bc of address 0.0.0.0)
+    //server_addr.sin_addr.s_addr = (server_addr.sin_addr.s_addr == NULL) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : server_addr.sin_addr.s_addr; //TODO: handle (0 check doesn't work bc of address 0.0.0.0)
     port = (port == 0) ? (conf->port ? conf->port : 8888) : port;//NOTE: order is argument > config > default value
     log_set_level(log_level);
+    FILE *fp = fopen(conf->log_file, "a"); //TODO: close at the end 
+    if (!fp) {
+        log_error("cannot open config file %s: %s", conf->log_file, strerror(errno));
+    }
+    log_add_fp(fp, 0); 
 
     printf("address=%s port=%d, log_level=%d, config_path=%s\n", inet_ntoa(server_addr.sin_addr), port, log_level, config_path);
 

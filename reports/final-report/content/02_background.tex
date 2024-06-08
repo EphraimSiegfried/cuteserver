@@ -1,7 +1,5 @@
 \section*{Background}
 In this section we explain some concepts we had to understand implementing our project. 
-% Some "prerequisite" knowledge we assume is known: Socket Programming Protocols (TCP etc.), Interprocess Communication 
-% Fussnote: HTTP Protocol Doc, CGI doc  
 
 \subsection*{HTTP Protocol}
 The Hypertext Transfer Protocol (HTTP) is an application layer protocol which defines how data can be exchanged over the Internet. It is generally sent over TCP, as it relies on a reliable transport protocol. 
@@ -11,7 +9,7 @@ The general structure of a request is the following: The first line denotes the 
 
 There are several Request Methods which signal what kind of action should be performed. \footnote{https://datatracker.ietf.org/doc/html/rfc1945\#section-8} For example: 
 \begin{description}
-    \item[GET]retrieve state representation of target resource. Parameters sent through URL %TODO: URL Beispiel 
+    \item[GET]retrieve state representation of target resource. Parameters sent through URL 
     \item[HEAD]retrieve only metadata. 
     \item[POST]request that target resource processes the representation in the request body. 
 \end{description}
