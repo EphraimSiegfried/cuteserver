@@ -1,18 +1,20 @@
 \section*{Conclusion}
 % Comparison to original Plan 
-We were successful in our project and comparing to our original plan we implemented everything but websockets. 
-What we miscalculated a bit was the POST-Request handling (as we didn't know about CGI before). This took more time than we anticipated. 
+In Comparison to our initial project plan, our webserver fulfilled the following requirements: process HTTP requests, allow multiple clients to connect, handle concurrent access to resources, handle errors, log web traffic, handle multiple domains and resources. We implemented everything but websockets. \\
 
-Project Planning in General: we never looked at the JIRA Board during the project. so maybe next time find a different way to plan.
+We are satisfied with our result and had fun and learned a lot. Regarding the project planning, we never looked at the JIRA Board during the whole project. Maybe next time we can find a more appropriate planning tool for our workflow. \\
+
+Where we spent more time as initially planned was the POST-Request handling, as we didn't know about CGI (Common Gateway Interface) before, and had to spend more time than anticipated understanding and implementing the protocol. 
 
 \subsection*{Lessons learned}
-% handling strings in C 
-% if statements  
-% dont close sockets and then forget 
+\begin{itemize}
+    \item handling Strings in C 
+    \item memory management (buffer sizes)
+\end{itemize}
 
 \subsection*{Future Outlook}
 \begin{description}
     \item[fast CGI]Implementing fast CGI to enhance performance and keep up with standards
-    \item[Security]
+    \item[Security]Test and enhance the security of our webserver
     \item[Websockets]
 \end{description}
