@@ -43,6 +43,7 @@ function App() {
 
         try {
             const newData = { name, message };
+            const last_data_len = data.length;
             const response = await fetch("/api/messages", {
                 method: "POST",
                 headers: {
@@ -52,7 +53,10 @@ function App() {
             });
             if (!response.ok) throw new Error("Failed to post message");
             const postedMessage = await response.json();
-            setData([...data, postedMessage]); // Update local state with the new message
+            // pseudo synchronization
+            if (last_data_len == data.length) {
+                setData([...data, postedMessage]); // Update local state with the new message
+            }
             setMessage("");
         } catch (err) {
             console.error(err);

@@ -13,6 +13,7 @@ void handle_post();
 int file_exists(const char *filename);
 void read_data_file(int start_line);
 void write_data_file(struct json_object *json_obj);
+void escaped_print(char *str);
 
 int main() {
     char *request_method = getenv("REQUEST_METHOD");
@@ -95,7 +96,11 @@ void read_data_file(int start_line) {
         strip_newline(line);
         char *name = strtok(line, SEPARATOR);
         char *message = strtok(NULL, SEPARATOR);
-        printf("{\"name\":\"%s\",\"message\":\"%s\"}", name, message);
+        printf("{\"name\":\"");
+        escaped_print(name);
+        printf("\",\"message\":\"");
+        escaped_print(message);
+        printf("\"}");
     }
     printf("]");
     fclose(file);
@@ -118,4 +123,14 @@ void write_data_file(struct json_object *new_entry) {
     fprintf(file, "%s%s%s\n", str_name, SEPARATOR, str_message);
     fclose(file);
     printf("%s", json_object_to_json_string(new_entry));
+}
+
+void escaped_print(char *str) {
+    for (size_t i = 0; str[i]; i++) {
+        if (str[i] == '\"') {
+            printf("\\\"");
+        } else {
+            printf("%c", str[i]);
+        }
+    }
 }
