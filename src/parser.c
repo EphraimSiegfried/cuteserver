@@ -23,7 +23,7 @@ int parse_headers(char *buf, struct sc_map_str *header_map) {
 
 int parse_request_line(char *buff, int buf_length, request_info *req_i) {
     char *original_buff = buff;
-    printf("PARSER BUFF: %s END\n", buff);
+    // printf("PARSER BUFF: %s END\n", buff);
 
     req_i->req_type = trim(strsep(&buff, " "));
     char *url = trim(strsep(&buff, " "));
