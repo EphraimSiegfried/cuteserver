@@ -1,5 +1,5 @@
 # stage 1: builder
-FROM gcc:9 as builder
+FROM gcc:9 as cutie-builder
 
 RUN apt-get update && apt-get install -y \
     cmake \
@@ -13,6 +13,23 @@ COPY src/ src/
 COPY deps/ deps/
 RUN cmake . && make install
 
+# Setup frontend
+FROM node:17-alpine as node-build
+WORKDIR /app/frontend
+COPY example_app/frontend/package.json .
+COPY example_app/frontend/package-lock.json .
+RUN npm install
+COPY example_app/frontend/ .
+RUN npm run build
+
+# Setup backend
+FROM gcc:9 as cmake-build
+WORKDIR /app/backend
+RUN apt-get update && apt-get install -y cmake libjson-c-dev
+COPY example_app/backend/CMakeLists.txt .
+COPY example_app/backend/main.c .
+RUN cmake . && make
+
 # stage 2: final
 FROM debian:buster
 
@@ -21,6 +38,14 @@ RUN apt-get update && apt-get install -y tini
 
 EXPOSE 8888
 
-COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=cutie-builder /usr/local/bin /usr/local/bin
+
+#TODO: location of entrypoint statement ? 
+
+WORKDIR /content
+COPY config.toml /
+COPY --from=node-build /app/frontend/dist/ .
+COPY --from=cmake-build /app/backend/main.cgi ./cgi-bin/
 
 ENTRYPOINT ["/usr/bin/tini", "--", "cuteserver", "-a", "0.0.0.0", "-p", "8888", "-c", "/config.toml"]
+
