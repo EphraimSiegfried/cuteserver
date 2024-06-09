@@ -30,10 +30,8 @@ int parse_request_line(char *buff, int buf_length, request_info *req_i) {
     req_i->query = strsep(&url, " ");
 
     // resolve real path
-    char *real_path = malloc(sizeof(char) * 1024);
     const char *mapped_path = sc_map_get_str(&conf->resources[0].remaps, req_i->file_path);
-    sprintf(real_path, "%s%s", conf->resources[0].root, mapped_path ? mapped_path : req_i->file_path);
-    req_i->real_path = real_path;
+    sprintf(req_i->real_path, "%s%s", conf->resources[0].root, mapped_path ? mapped_path : req_i->file_path);
 
     req_i->version = trim(strsep(&buff, "\n"));
 
@@ -52,4 +50,33 @@ int resolve_real_path(request_info *req_i) {
     const char *mapped_path = sc_map_get_str(&conf->resources[id].remaps, req_i->file_path);
     sprintf(req_i->real_path, "%s%s", conf->resources[id].root, mapped_path ? mapped_path : req_i->file_path);
     return 1;
+}
+
+request_info *allocate_request_info() {
+    // Allocate memory for the struct
+    request_info *req_i = (request_info *) malloc(sizeof(request_info));
+    if (!req_i) {
+        log_error("Memory allocation failed for request_info");
+        return NULL;
+    }
+
+    // Initialize the allocated memory to 0
+    memset(req_i, 0, sizeof(request_info));
+
+    // Allocate memory for real_path
+    req_i->real_path = (char *) malloc(sizeof(char) * 1024);
+    if (!req_i->real_path) {
+        log_error("Memory allocation failed for real_path");
+        free(req_i);
+        return NULL;
+    }
+    return req_i;
+}
+void free_request_info(request_info *req_i) {
+    if (req_i == NULL) return;
+
+    if (req_i->real_path != NULL) {
+        free(req_i->real_path);
+    }
+    free(req_i);
 }
