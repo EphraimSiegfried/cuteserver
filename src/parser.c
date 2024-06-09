@@ -73,9 +73,9 @@ request_info *allocate_request_info() {
     return req_i;
 }
 void free_request_info(request_info *req_i) {
-    if (req_i == NULL) return;
+    if (!req_i) return;
 
-    if (req_i->real_path != NULL) {
+    if (req_i->real_path) {
         free(req_i->real_path);
     }
     free(req_i);

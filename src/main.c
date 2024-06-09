@@ -42,7 +42,6 @@ void serve(void *client_info) {
     do {
         memset(buff, 0, sizeof(buff));
 
-        // Allocate memory for request_info struct
         request_info *req_i = allocate_request_info();
         if (req_i == NULL) {
             log_error("Memory allocation failed for request_info");
@@ -65,7 +64,6 @@ void serve(void *client_info) {
             free_request_info(req_i);
             break;
         }
-        log_info("Main:%s %s %s %s", req_i->req_type, req_i->file_path, req_i->version, req_i->real_path);
 
         sc_map_init_str(&req_i->headers, 0, 0);// Initialize headers map
         if ((hdr_len = parse_headers(buff + rl_len, &req_i->headers)) < 0) {
@@ -79,14 +77,13 @@ void serve(void *client_info) {
         resolve_real_path(req_i);
 
         if (access(req_i->real_path, F_OK) != 0) {
-            log_error("File not found: %s", req_i->file_path);
+            log_warn("File not found: %s", req_i->file_path);
             send_error(*client_socket, NOTFOUND);
             free_request_info(req_i);
             break;
         }
 
         if (strcmp(req_i->version, "HTTP/1.1") != 0) {
-            log_error("Not supported:%s", req_i->version);
             send_error(*client_socket, VERSIONNOTSUPPORTED);
             free_request_info(req_i);
             break;
@@ -96,7 +93,6 @@ void serve(void *client_info) {
         if (connection && strcasecmp(connection, "keep-alive") != 0) {
             keep_alive = false;
         }
-        log_debug("Client sent: %s", connection);
 
         int return_val;
         if (ends_with("cgi", req_i->real_path)) {
@@ -113,8 +109,6 @@ void serve(void *client_info) {
         free_request_info(req_i);
 
     } while (keep_alive);
-
-    log_debug(" bye %d", *client_socket);
     close(*client_socket);
     return;
 }
@@ -187,7 +181,7 @@ int main(int argc, char *argv[]) {
     }
     log_add_fp(fp, 0);
 
-    log_info("address=%s port=%d, log_level=%d, config_path=%s\n", inet_ntoa(server_addr.sin_addr), port, log_level, config_path);
+    log_debug("Address: %s Port=%d, Log Level: %d, Config Path: %s\n", inet_ntoa(server_addr.sin_addr), port, log_level, config_path);
 
     // SERVER SOCKET
     // PF_INET= ipv4, SOCK_STREAM=tcp
@@ -215,7 +209,6 @@ int main(int argc, char *argv[]) {
         unsigned int client_addr_len = sizeof(client_sock_i->client_address);
         client_sock_i->client_socket = accept(server_sock, (struct sockaddr *) &client_sock_i->client_address, &client_addr_len);
 
-        log_debug("Created sock: %d", client_sock_i->client_socket);
         if (client_sock_i->client_socket < 0) {
             log_fatal("Accepting Error: %d", strerror(errno));
             exit(EXIT_FAILURE);
