@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <limits.h>
 #include <omp.h>
+#include <semaphore.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/errno.h>
@@ -14,7 +15,6 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #define MAX_BUF_SIZE 8122
 #define MAX_PENDING 21
 
@@ -200,31 +200,44 @@ int main(int argc, char *argv[]) {
         log_fatal("Listening error %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
-
+    omp_set_dynamic(1);
     omp_set_num_threads(conf->workers);
+    sem_t connection_semaphore;
+    sem_init(&connection_semaphore, 0, conf->workers);
 
-#pragma omp parallel
+#pragma omp parallel shared(server_sock, connection_semaphore) default(none)
     {
 #pragma omp single
         {
             while (1) {
                 client_socket_info *client_sock_i = malloc(sizeof(client_socket_info));
+                if (client_sock_i == NULL) {
+                    log_fatal("Memory allocation error: %s\n", strerror(errno));
+                }
+
                 unsigned int client_addr_len = sizeof(client_sock_i->client_address);
                 client_sock_i->client_socket = accept(server_sock, (struct sockaddr *) &client_sock_i->client_address, &client_addr_len);
 
                 if (client_sock_i->client_socket < 0) {
-                    log_fatal("Accepting Error: %d", strerror(errno));
-                    exit(EXIT_FAILURE);
-                }
-                log_info("New connection accepted from %s:%d", inet_ntoa(client_sock_i->client_address.sin_addr), ntohs(client_sock_i->client_address.sin_port));
+                    log_fatal("Accepting Error: %s\n", strerror(errno));
+                    free(client_sock_i);
+                } else {
+                    log_info("New connection accepted from %s:%d\n", inet_ntoa(client_sock_i->client_address.sin_addr), ntohs(client_sock_i->client_address.sin_port));
+
+                    // Wait for a semaphore before creating a new task
+                    sem_wait(&connection_semaphore);
 
 #pragma omp task firstprivate(client_sock_i)
-                {
-                    serve(client_sock_i);
+                    {
+                        serve(client_sock_i);
+                        sem_post(&connection_semaphore);// Release the semaphore when done
+                    }
                 }
             }
         }
     }
+
+    sem_destroy(&connection_semaphore);
 
     // Cleanup when program exits
     cleanup();
