@@ -1,0 +1,22 @@
+# ninja log v6
+1	69	1717854466926896773	CMakeFiles/cuteserver.dir/deps/log/log.c.o	d1d73ca2c2d542a1
+4	84	1717854466930896732	CMakeFiles/cuteserver.dir/src/cgi_handler.c.o	24c3269642c61a6b
+2	96	1717854466926896773	CMakeFiles/cuteserver.dir/deps/threadpool/thpool.c.o	7df62f1305e9ada3
+6	109	1717854466930896732	CMakeFiles/cuteserver.dir/src/config.c.o	524e00d7e421bc41
+69	157	1717854466994896079	CMakeFiles/cuteserver.dir/src/main.c.o	e60078f7cad5e1fe
+84	177	1717854467010895916	CMakeFiles/cuteserver.dir/src/parser.c.o	b34b631e3abff2ee
+158	190	1717854467082895177	CMakeFiles/cuteserver.dir/src/utils.c.o	d75067d1b21b5796
+96	192	1717854467022895793	CMakeFiles/cuteserver.dir/src/request.c.o	36b0eacdc8ff972f
+110	193	1717854467034895669	CMakeFiles/cuteserver.dir/src/response.c.o	b7700c8a659c7202
+4	202	1717854466930896732	CMakeFiles/cuteserver.dir/deps/tomlparser/toml.c.o	cfceebebdf281458
+1	323	1717854466926896773	CMakeFiles/cuteserver.dir/deps/hashmap/sc_map.c.o	4a5f1065de53ad4a
+323	345	1717854467250893454	cuteserver	52751a6ffe753bce
+4	53	1717881964466042037	CMakeFiles/cuteserver.dir/src/parser.c.o	b34b631e3abff2ee
+3	53	1717881964466042037	CMakeFiles/cuteserver.dir/src/config.c.o	524e00d7e421bc41
+5	58	1717881964466042037	CMakeFiles/cuteserver.dir/src/request.c.o	36b0eacdc8ff972f
+4	59	1717881964466042037	CMakeFiles/cuteserver.dir/src/main.c.o	e60078f7cad5e1fe
+59	94	1717881964522041813	cuteserver	52751a6ffe753bce
+0	29	1717882016413836128	CMakeFiles/cuteserver.dir/src/main.c.o	e60078f7cad5e1fe
+29	47	1717882016441836018	cuteserver	52751a6ffe753bce
+0	28	1717882185907126923	CMakeFiles/cuteserver.dir/src/main.c.o	e60078f7cad5e1fe
+28	44	1717882185935128369	cuteserver	52751a6ffe753bce

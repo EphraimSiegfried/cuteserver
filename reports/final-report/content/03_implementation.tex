@@ -1,14 +1,14 @@
 \section*{Implementation}
 
 \subsection*{Development Environment} 
-The development of Cuteserver was primarily accomplished through pair programming. We held regular meetings where we shared our terminals using a shell sharing tool called \textbf{sshx} \footnote{https://sshx.io/}. This tool was particularly effective for collaboration since we both used \textbf{Neovim} \footnote{https://neovim.io/} as our code editor. \\
+The development of Cuteserver was primarily accomplished through pair programming. We held regular meetings where we shared our terminals using a shell sharing tool called \textbf{sshx} \footnote{SSHX. https://sshx.io/}. This tool was particularly effective for collaboration since we both used \textbf{Neovim} as our code editor. \\
  
 Initially, we used \textbf{Makefiles} to build the source code, but this approach was inefficient due to frequent adjustments. As the project grew more complex, we decided to use \textbf{CMake} for more efficient project building and file generation. \\
 
 Our implementation strategy for the web server was iterative, starting with small, manageable tasks and progressively tackling more complex ones. We regularly tested the code by running it with different inputs to ensure functionality.
 
 \subsection*{Project Structure} 
-We structured our code into modules, each handling a task or describing a logical "unit". In the \textbf{main} module the server socket is set up and incoming TCP connections are handled through a threadpool. When a new request is received, a thread starts serving the incoming request. Our implementation supports Keep-Alive Headers. Per default a "keep-alive"-Connection is assumed, so multiple responses can be sent over one TCP connection. (See Results). To prevent too many idle connections, a timeout of 5 Seconds is set. 
+We structured our code into modules, each handling a task or describing a logical "unit". In the main module the server socket is set up and incoming TCP connections are handled through a threadpool. When a new request is received, a thread starts serving the incoming request. Our implementation supports Keep-Alive Headers. Per default a "keep-alive"-Connection is assumed, so multiple responses can be sent over one TCP connection. (See Results). To prevent too many idle connections, a timeout of 5 Seconds is set. 
 %NOTE: Server waits for 7s though.  
 
 \subsection*{Static File Requests}
@@ -16,19 +16,20 @@ Each incoming request is parsed into request line, headers and body, and saved i
 For static requests, we access the file to receive metadata such as content length and type. For HEAD-Requests only the Headers are sent, for GET-Requests the file is also sent.  
 
 \subsection*{CGI}
-Dynamic Request are handled with CGI. This means the incoming request is parsed, then passed to the \textbf{CGI handler} which creates a new process running the corresponding cgi script. The CGI Protocol defines "meta-variables" \footnote{https://datatracker.ietf.org/doc/html/rfc3875#section-4.1} which have to be passed from server to CGI script using environment variables. \\
+Dynamic Request are handled with CGI. This means the incoming request is parsed, then passed to the CGI handler which creates a new process running the corresponding cgi script. The CGI Protocol defines "meta-variables" \footnote{RFC 3875. CGI Specification. Section 4.1 Request Meta-Variables. https://datatracker.ietf.org/doc/html/rfc3875#section-4.1} which have to be passed from server to CGI script using environment variables. \\
 
-The CGI process is started using the \textbf{execve} function, allowing us to pass the environment variables as an argument. Additional data has to be passed to the child process through standard in/output. 
-Communication between cgi process and server (parent process) is enabled through pipes. A pair of pipe descriptors is created before the child process is forked. Then, the child's descriptors are redirected to standard input and standard output \footnote{http://www.fmc-modeling.org/category/projects/apache/amp/A\_4\_Pipes.html, \\ and http://www.unixwiz.net/techtips/remap-pipe-fds.html } (See Figure 3).
+The CGI process is started using the \textbf{execve} function, allowing us to pass the environment variables as an argument. Additional data has to be passed to the child process through standard in/output. \footnote{Mapping UNIX pipe descriptors to stdin and stdout. http://www.unixwiz.net/techtips/remap-pipe-fds.html}
+Communication between cgi process and server (parent process) is enabled through pipes. A pair of pipe descriptors is created before the child process is forked. Then, the child's descriptors are redirected to standard input and standard output \footnote{Pipes. http://www.fmc-modeling.org/category/projects/apache/amp/A_4_Pipes.html} (See Figure 3).
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.7\textwidth]{figures/Pipes_BD.pdf}
-	\caption{Pipe Redirection} %QUELLE http://www.fmc-modeling.org/category/projects/apache/amp/A_4_Pipes.html
+	\caption{Pipe Redirection}
+    \floatfoot{\small Source: http://www.fmc-modeling.org/category/projects/apache/amp/A_4_Pipes.html}
 \end{figure}
 
 \subsection*{Server Configuration}
-From the beginning, we aimed for our web server to support hosting multiple resources connected to different domain names. To achieve this multidomain support, we needed to make the web server configurable. To ensure user-friendly configuration, we used \textbf{TOML} \footnote{https://toml.io/en/} files. The web server parses a configuration file listing all resources and their locations for the server to serve. Additionally, users can specify resource-independent settings, such as the number of active worker threads and log storage locations. We also provide a command line interface where users can specify the TCP address and the path to the configuration file.
+From the beginning, we aimed for our web server to support hosting multiple resources connected to different domain names. To achieve this multidomain support, we needed to make the web server configurable. To ensure user-friendly configuration, we used \textbf{TOML} files. The web server parses a configuration file listing all resources and their locations for the server to serve. Additionally, users can specify resource-independent settings, such as the number of active worker threads and log storage locations. We also provide a command line interface where users can specify the TCP address and the path to the configuration file.
 
 \subsection*{Example Application}
 % TODO: synchronization 
@@ -37,7 +38,7 @@ We had several web applications to test our web server. Initially, we used simpl
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=\textwidth]{figures/06_ephi_app.png} %TODO: ADD ANOTHER IMAGE
+	\includegraphics[width=\textwidth]{figures/screenshot_ex_app.png}
     \caption{Our Example Application}
 \end{figure}
 
