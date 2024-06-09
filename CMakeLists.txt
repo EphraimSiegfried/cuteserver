@@ -9,7 +9,8 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
 # Add compiler flags
-add_compile_options(-Wall -DLOG_USE_COLOR)
+
+add_compile_options(-Wall -DLOG_USE_COLOR -fopenmp)
 add_link_options(-pthread)
 
 include_directories(deps)
@@ -17,4 +18,10 @@ include_directories(deps)
 # Define the target executable and its source files
 file(GLOB_RECURSE SRC_FILES "src/*.c" "deps/*/*.c")
 add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+find_package(OpenMP REQUIRED)
+if (OpenMP_C_FOUND)
+    target_link_libraries(cuteserver PUBLIC OpenMP::OpenMP_C)
+endif()
+
 install(TARGETS ${PROJECT_NAME})

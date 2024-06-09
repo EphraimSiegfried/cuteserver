@@ -5,7 +5,8 @@ RUN apt-get update && apt-get install -y \
     cmake \
     make \
     g++ \
-    libc-dev
+    libc-dev \
+    libgomp1
 
 WORKDIR /webs
 COPY CMakeLists.txt .
@@ -22,5 +23,8 @@ RUN apt-get update && apt-get install -y tini
 EXPOSE 80
 
 COPY --from=builder /usr/local/bin /usr/local/bin
+
+RUN apt-get update && apt-get install -y \
+    libgomp1
 
 ENTRYPOINT ["/usr/bin/tini", "--", "cuteserver", "-a", "0.0.0.0", "-p", "80", "-c", "/config.toml"]

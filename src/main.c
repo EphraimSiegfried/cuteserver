@@ -1,5 +1,4 @@
 #include "../deps/log/log.h"
-#include "../deps/threadpool/thpool.h"
 #include "config.h"
 #include "parser.h"
 #include "request.h"
@@ -7,6 +6,7 @@
 #include "utils.h"
 #include <arpa/inet.h>
 #include <limits.h>
+#include <omp.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/errno.h>
@@ -23,15 +23,14 @@ typedef struct {
     struct sockaddr_in client_address;
 } client_socket_info;
 
-
-void serve(void *client_info) {
-    client_socket_info *client_sock_i = (client_socket_info *) client_info;
+void serve(client_socket_info *client_sock_i) {
     int *client_socket = &client_sock_i->client_socket;
     char buff[MAX_BUF_SIZE];
     const char *connection;
     int recvd_bytes, rl_len, hdr_len;
     bool keep_alive = true;
     struct timeval tv;
+    log_info("AMOUNT OF THREADS: %d", omp_get_num_threads());
 
     // We tell the client that the socket is open for 5 sec
     // but we make it actually a little longer, 7 sec
@@ -110,15 +109,15 @@ void serve(void *client_info) {
 
     } while (keep_alive);
     close(*client_socket);
+    free(client_sock_i);
     return;
 }
 
 int server_sock;
-threadpool thpool;
+
 void cleanup() {
     log_debug("Exiting...cleaning up");
     close(server_sock);
-    thpool_destroy(thpool);
     cleanup_config();
     log_debug("Finished cleanup");
     exit(0);
@@ -202,21 +201,31 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    thpool = thpool_init(conf->workers);
+    omp_set_num_threads(conf->workers);
 
-    while (1) {
-        client_socket_info *client_sock_i = malloc(sizeof(client_socket_info));
-        unsigned int client_addr_len = sizeof(client_sock_i->client_address);
-        client_sock_i->client_socket = accept(server_sock, (struct sockaddr *) &client_sock_i->client_address, &client_addr_len);
+#pragma omp parallel
+    {
+#pragma omp single
+        {
+            while (1) {
+                client_socket_info *client_sock_i = malloc(sizeof(client_socket_info));
+                unsigned int client_addr_len = sizeof(client_sock_i->client_address);
+                client_sock_i->client_socket = accept(server_sock, (struct sockaddr *) &client_sock_i->client_address, &client_addr_len);
 
-        if (client_sock_i->client_socket < 0) {
-            log_fatal("Accepting Error: %d", strerror(errno));
-            exit(EXIT_FAILURE);
+                if (client_sock_i->client_socket < 0) {
+                    log_fatal("Accepting Error: %d", strerror(errno));
+                    exit(EXIT_FAILURE);
+                }
+                log_info("New connection accepted from %s:%d", inet_ntoa(client_sock_i->client_address.sin_addr), ntohs(client_sock_i->client_address.sin_port));
+
+#pragma omp task firstprivate(client_sock_i)
+                {
+                    serve(client_sock_i);
+                }
+            }
         }
-        log_info("New connection accepted from %s:%d", inet_ntoa(client_sock_i->client_address.sin_addr), ntohs(client_sock_i->client_address.sin_port));
-
-        // setsockopt(*client_sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-
-        thpool_add_work(thpool, serve, client_sock_i);
     }
+
+    // Cleanup when program exits
+    cleanup();
 }
