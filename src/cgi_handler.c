@@ -9,8 +9,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-
-#define ENV_BUF_SIZE 300
+#define ENV_BUF_SIZE 200
 
 int set_env(char *env_variables[], request_info *req_i) {
     char temp[ENV_BUF_SIZE];
@@ -33,7 +32,7 @@ int set_env(char *env_variables[], request_info *req_i) {
     env_variables[8] = strdup(temp);
     sprintf(temp, "QUERY_STRING=%s", req_i->query);
     env_variables[9] = strdup(temp);
-    char hostname[256];
+    char hostname[ENV_BUF_SIZE];
     gethostname(hostname, sizeof(hostname));
     sprintf(temp, "REMOTE_HOST=%s", hostname);
     env_variables[10] = strdup(temp);
@@ -100,7 +99,6 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
         }
         while ((count = read(stdout_pipe[0], *cgi_output + total_bytes_read, buffer_size - total_bytes_read)) > 0) {
             total_bytes_read += count;
-            // log_info("buffer: %s", *cgi_output);
 
             // If the buffer is full, increase its size
             if (total_bytes_read >= buffer_size) {
@@ -114,7 +112,7 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
                 }
                 *cgi_output = new_cgi_output;
             } else {
-                break;//TODO: find better solution
+                break; //TODO: find better solution
             }
         }
 

@@ -88,11 +88,6 @@ int parse_config(char *path) {
     }
     conf->identifier = identifier;
 
-    // const char *key;
-    // const char *value;
-    // sc_map_foreach(&conf->resources[0].remaps, key, value) {
-    //     printf("Key:[%s], Value:[%s] \n", key, value);
-    // }
     return 1;
 }
 
