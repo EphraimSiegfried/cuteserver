@@ -16,7 +16,7 @@ int set_env(char *env_variables[], request_info *req_i) {
     char temp[ENV_BUF_SIZE];
 
     env_variables[0] = "SERVER_SOFTWARE=cuteserver/0.1";
-    env_variables[1] = "SERVER_NAME=localhost";//TODO: assign correct name
+    env_variables[1] = "SERVER_NAME=cuteserver";
     env_variables[2] = "GATEWAY_INTERFACE=CGI/1.1";
     sprintf(temp, "SERVER_PROTOCOL=%s", req_i->version);
     env_variables[3] = strdup(temp);

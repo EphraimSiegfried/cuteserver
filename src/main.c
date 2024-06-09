@@ -119,15 +119,17 @@ int main(int argc, char *argv[]) {
     int opt;
     char *config_path = "./config.toml";
     struct sockaddr_in server_addr;
+    int server_addr_valid = 0; 
     int port = 0;
     int log_level = 0;
     while ((opt = getopt(argc, argv, "a:p:l:c:")) != -1) {
         switch (opt) {
-            case 'a':                                               //address, default value = 127.0.0.1
-                if (inet_aton(optarg, &server_addr.sin_addr) == 0) {//returns 0 on error
+            case 'a': //address, default value = 127.0.0.1
+                if ((server_addr_valid = inet_aton(optarg, &server_addr.sin_addr) == 0)) {//returns 0 on error
                     printf("Invalid address value.\n");
                     return -1;
                 }
+                server_addr_valid = 1; 
                 break;
             case 'p':// port, default value = 8888
                 port = atoi(optarg);
@@ -156,7 +158,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     parse_config(config_path);
-    //server_addr.sin_addr = (server_addr.sin_addr == NULL) ? (conf->address ? conf->address : inet_addr("127.0.0.1")) : server_addr.sin_addr.s_addr; //TODO: handle (0 check doesn't work bc of address 0.0.0.0)
+    server_addr.sin_addr.s_addr = (server_addr_valid == 0) ? (conf->address ? inet_addr(conf->address) : inet_addr("127.0.0.1")) : server_addr.sin_addr.s_addr; 
     port = (port == 0) ? (conf->port ? conf->port : 8888) : port;//NOTE: order is argument > config > default value
     log_set_level(log_level);
     FILE *fp = fopen(conf->log_file, "a"); //TODO: close at the end 
@@ -165,7 +167,7 @@ int main(int argc, char *argv[]) {
     }
     log_add_fp(fp, 0); 
 
-    printf("address=%s port=%d, log_level=%d, config_path=%s\n", inet_ntoa(server_addr.sin_addr), port, log_level, config_path);
+    log_info("address=%s port=%d, log_level=%d, config_path=%s\n", inet_ntoa(server_addr.sin_addr), port, log_level, config_path);
 
     // SERVER SOCKET
     // PF_INET= ipv4, SOCK_STREAM=tcp

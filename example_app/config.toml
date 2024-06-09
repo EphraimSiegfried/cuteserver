@@ -1,6 +1,6 @@
 [server]
     port = 8888
-    address = "123.2.1.1"
+    address = "0.0.0.0"
     workers = 8
     log_file = "./logs"
 

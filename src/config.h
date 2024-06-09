@@ -13,7 +13,7 @@ typedef struct {
 
 typedef struct {
     int workers;
-    in_addr_t address; 
+    char* address; 
     int port;
     resource *resources;
     char *log_file; 
