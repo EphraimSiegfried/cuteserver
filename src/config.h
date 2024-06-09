@@ -7,14 +7,13 @@
 typedef struct {
     char *domain;
     char *root;
-    char *logs; //TODO: remove
     char *cgi_bin_dir;
     struct sc_map_str remaps;
 } resource;
 
 typedef struct {
     int workers;
-    in_addr_t address; 
+    char* address; 
     int port;
     resource *resources;
     char *log_file; 

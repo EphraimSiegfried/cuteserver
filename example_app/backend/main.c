@@ -103,6 +103,7 @@ void read_data_file(int start_line) {
         printf("\"}");
     }
     printf("]");
+    free(line); 
     fclose(file);
 }
 

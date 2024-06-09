@@ -9,14 +9,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-
-#define ENV_BUF_SIZE 100
+#define ENV_BUF_SIZE 200
 
 int set_env(char *env_variables[], request_info *req_i) {
     char temp[ENV_BUF_SIZE];
 
     env_variables[0] = "SERVER_SOFTWARE=cuteserver/0.1";
-    env_variables[1] = "SERVER_NAME=localhost";//TODO: assign correct name
+    env_variables[1] = "SERVER_NAME=cuteserver";
     env_variables[2] = "GATEWAY_INTERFACE=CGI/1.1";
     sprintf(temp, "SERVER_PROTOCOL=%s", req_i->version);
     env_variables[3] = strdup(temp);
@@ -33,7 +32,10 @@ int set_env(char *env_variables[], request_info *req_i) {
     env_variables[8] = strdup(temp);
     sprintf(temp, "QUERY_STRING=%s", req_i->query);
     env_variables[9] = strdup(temp);
-    env_variables[10] = "REMOTE_HOST=NULL";
+    char hostname[ENV_BUF_SIZE];
+    gethostname(hostname, sizeof(hostname));
+    sprintf(temp, "REMOTE_HOST=%s", hostname);
+    env_variables[10] = strdup(temp);
     sprintf(temp, "REMOTE_ADDR=%s", inet_ntoa(req_i->client_addr.sin_addr));
     env_variables[11] = strdup(temp);
     env_variables[12] = "AUTH_TYPE=NULL";
@@ -60,7 +62,7 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
     //stdin: parent -> child, stdout: child -> parent
     int stdin_pipe[2], stdout_pipe[2];//pipes have two ends (read & write)
     if (pipe(stdin_pipe) < 0 || pipe(stdout_pipe) < 0) {
-        printf("Pipe error");
+        log_error("Pipe error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -79,7 +81,7 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
 
         // Execute command that generates output
         if (execve(req_i->real_path, arguments, env_variables) < 0) {
-            printf("Error: %s\n", strerror(errno));
+            log_error("Execve: %s\n", strerror(errno));
         }
     } else if (pid > 0) {
         // This is the parent process
@@ -91,22 +93,19 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
         // Read the output from the child process
         *cgi_output = malloc(buffer_size);
         if (!cgi_output) {
-            log_error("Malloc error: %s", strerror(errno));
+            log_error("Malloc: %s", strerror(errno));
             close(stdout_pipe[0]);
             return -1;
         }
         while ((count = read(stdout_pipe[0], *cgi_output + total_bytes_read, buffer_size - total_bytes_read)) > 0) {
             total_bytes_read += count;
-            log_info("bytes read: %d", total_bytes_read);
-            log_info("count: %d", count);
-            // log_info("buffer: %s", *cgi_output);
 
             // If the buffer is full, increase its size
             if (total_bytes_read >= buffer_size) {
                 buffer_size *= 2;// Double the buffer size
                 char *new_cgi_output = realloc(*cgi_output, buffer_size);
                 if (new_cgi_output == NULL) {
-                    perror("realloc");
+                    log_error("Realloc:, %s", strerror(errno));
                     free(*cgi_output);
                     close(stdout_pipe[0]);
                     return -1;
@@ -118,7 +117,7 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
         }
 
         if (count == -1) {
-            perror("read");
+            log_error("Read:, %s", strerror(errno));
             free(*cgi_output);
             close(stdout_pipe[0]);
             return -1;
@@ -130,7 +129,7 @@ int run_cgi_script(request_info *req_i, char **cgi_output) {
         waitpid(pid, &status, 0);
 
     } else {
-        printf("Error");
+        log_error("Error while forking");
         return -1;
     }
 

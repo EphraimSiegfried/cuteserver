@@ -1,14 +1,14 @@
 [server]
     port = 8888
-    address = "123.2.1.1"
-    workers = 2
+    address = "0.0.0.0"
+    workers = 8
     log_file = "./logs"
 
 [resource.cute]
-    domain = "nedkitty.pumuckipla.net:8888"
+    domain = "localhost:8888"
     root = "/content"
     cgi_bin_dir = "/webs/content/cgi-bin"
     [resource.cute.remaps]
-        "/clients/hello" = "clients/hello.php"
+        "/clients/hello" = "/cgi-bin/first.cgi"
         "/api/messages" = "/cgi-bin/main.cgi"
         "/messages" = "/cgi-bin/main.cgi"

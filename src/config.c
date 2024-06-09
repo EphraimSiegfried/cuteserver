@@ -46,7 +46,7 @@ int parse_config(char *path) {
     if (!server) handle_error("server");
 
     conf = malloc(sizeof(config));//TODO:free
-    conf->address = inet_addr(get_str("address", server)); 
+    conf->address = get_str("address", server); 
     conf->port = get_int("port", server);
     conf->workers = get_int("workers", server);
     conf->log_file = get_str("log_file", server); 
@@ -88,11 +88,6 @@ int parse_config(char *path) {
     }
     conf->identifier = identifier;
 
-    // const char *key;
-    // const char *value;
-    // sc_map_foreach(&conf->resources[0].remaps, key, value) {
-    //     printf("Key:[%s], Value:[%s] \n", key, value);
-    // }
     return 1;
 }
 
