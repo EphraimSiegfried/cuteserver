@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define REAL_PATH_SIZE 1024
+
 int parse_headers(char *buf, struct sc_map_str *header_map) {
     const char *key, *value;
     char *temp_buf = buf;
@@ -31,7 +33,7 @@ int parse_request_line(char *buff, int buf_length, request_info *req_i) {
 
     // resolve real path
     const char *mapped_path = sc_map_get_str(&conf->resources[0].remaps, req_i->file_path);
-    sprintf(req_i->real_path, "%s%s", conf->resources[0].root, mapped_path ? mapped_path : req_i->file_path);
+    snprintf(req_i->real_path, REAL_PATH_SIZE, "%s%s", conf->resources[0].root, mapped_path ? mapped_path : req_i->file_path);
 
     req_i->version = trim(strsep(&buff, "\n"));
 
@@ -48,7 +50,7 @@ int resolve_real_path(request_info *req_i) {
     uint64_t id = sc_map_get_s64(&conf->identifier, domain);
     if (!sc_map_found(&conf->identifier)) return -1;
     const char *mapped_path = sc_map_get_str(&conf->resources[id].remaps, req_i->file_path);
-    sprintf(req_i->real_path, "%s%s", conf->resources[id].root, mapped_path ? mapped_path : req_i->file_path);
+    snprintf(req_i->real_path, REAL_PATH_SIZE, "%s%s", conf->resources[id].root, mapped_path ? mapped_path : req_i->file_path);
     return 1;
 }
 
@@ -64,11 +66,10 @@ request_info *allocate_request_info() {
     memset(req_i, 0, sizeof(request_info));
 
     // Allocate memory for real_path
-    req_i->real_path = (char *) malloc(sizeof(char) * 1024);
+    req_i->real_path = (char *) malloc(sizeof(char) * REAL_PATH_SIZE);
     if (!req_i->real_path) {
         log_error("Memory allocation failed for real_path");
         free(req_i);
-        return NULL;
     }
     return req_i;
 }

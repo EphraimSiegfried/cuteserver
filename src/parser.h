@@ -2,7 +2,6 @@
 #define WEBSERVER_PARSER_H
 
 #include <netinet/in.h>
-#define TODO_SIZE 6342
 #include "../deps/hashmap/sc_map.h"
 
 typedef struct {
