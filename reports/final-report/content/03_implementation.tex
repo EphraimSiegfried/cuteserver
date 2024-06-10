@@ -34,7 +34,7 @@ From the beginning, we aimed for our web server to support hosting multiple reso
 \subsection*{Example Application}
 % TODO: synchronization 
 
-We had several web applications to test our web server. Initially, we used simple HTML files and gradually added more complex ones. Eventually, we developed a more sophisticated application using the React framework for the front end. This application is a simple chat app that makes POST requests when users submit chat messages. These POST requests are handled by our backend service, which stores the chat messages in a JSON file and sends the JSON data to clients. We initially wrote this service using the Flask framework in Python to test if interpreted languages could work as CGI scripts. While this worked, we later translated the backend Python script to a C script to achieve faster response times by running compiled executables. 
+We had several web applications to test our web server. Initially, we used simple HTML files and gradually added more complex ones. Eventually, we developed a more sophisticated application using the React framework for the front end. This application is a simple chat app that makes POST requests when users submit chat messages. These POST requests are handled by our backend service, which stores the chat messages in a file and sends the content to clients. We initially wrote this service using the Flask framework in Python to test if interpreted languages could work as CGI scripts. While this worked, we later translated the backend Python script to a C script to achieve faster response times by running compiled executables. 
 
 \begin{figure}[h]
 	\centering
