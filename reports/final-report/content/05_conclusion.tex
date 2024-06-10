@@ -1,21 +1,23 @@
 \section*{Conclusion}
 % Comparison to original Plan 
-In Comparison to our initial project plan, our webserver fulfilled the following requirements: process HTTP requests, allow multiple clients to connect, handle concurrent access to resources, handle errors, log web traffic, handle multiple domains and resources. We implemented everything but websockets. Overall, we are satisfied with our result.
+Our initial goal was to gain a deeper understanding of the internal workings of web servers and their configurations. We successfully achieved this goal through this project. \\
+In Comparison to our initial project plan, our web server fulfilled the following requirements: process HTTP requests, allow multiple clients to connect, handle concurrent access to resources, handle errors, log web traffic, handle multiple domains and resources. We implemented everything but websockets. Overall, we are satisfied with our result.
 
 
 \subsection*{Lessons learned}
 \begin{description}
-    \item[Project Plan]We rarely looked at the JIRA Project Plan we created in the beginning.Maybe next time we can find a more appropriate planning tool for our workflow.
+    \item[C Programming] We gained a deeper understanding of C programming principles, especially in handling strings. Writing HTTP parsers required extensive work with strings, leading to many bugs related to string handling in C. As a result, we have learned a lot about working with char arrays and continue to improve in this area.
+    \item[Project Plan]We rarely looked at the JIRA Project Plan we created in the beginning. Maybe next time we can find a more appropriate planning tool for our workflow.
     Where we spent more time as initially planned was the POST-Request handling, as we didn't know about CGI (Common Gateway Interface) before, and had to spend more time than anticipated understanding and implementing the protocol. 
-    \item[Testing] We only started performance testing our application in the end. Some of the results were quite confusing. To test multithreading we had to consider different system behaviour in Docker, test on different machines because Locust also needs resources, ...
-    \item[System Influences]We had some difficulties in getting our application to run the same way on different machines. Outside influences such as hardware, network configuration on our servers etc. lead to some errors. 
-    \item[Memory Management] Buffer Sizes ... 
+    % \item[Testing] We only started performance testing our application in the end. Some of the results were quite confusing. To better test the performance of our web server we would have needed machines with more cores in ord
+    \item[Reproducibility]We encountered difficulties in ensuring our application ran consistently across different machines. Factors such as the OS, hardware, and network configurations on our servers caused errors. We resolved some of these issues by containerizing our application, learning a lot in the process. However, despite containerizing everything, there were still differences in application behavior.
 \end{description}
 
 
 \subsection*{Future Outlook}
+Below are some features we wanted to implement but didn't have the time for:
 \begin{description}
-    \item[fast CGI]Implementing fast CGI to enhance performance and keep up with standards
-    \item[Security]Test and enhance the security of our webserver
-    \item[Websockets]
+    \item[Fast CGI]Implementing Fast CGI to enhance performance and keep up with industry standards.
+    \item[Security]Testing and enhancing the security of our web server. 
+    \item[Web sockets] Implementing web sockets to eliminate the need for client polling for application state changes, thereby improving overall performance.
 \end{description}
