@@ -182,7 +182,6 @@ int main(int argc, char *argv[]) {
     log_add_fp(fp, 0);
 
     log_debug("Address: %s Port=%d, Log Level: %d, Config Path: %s\n", inet_ntoa(server_addr.sin_addr), port, log_level, config_path);
-    log_debug("TEST: %s und %s", conf->resources[0].domain, conf->resources[1].domain);
 
     // SERVER SOCKET
     // PF_INET= ipv4, SOCK_STREAM=tcp
