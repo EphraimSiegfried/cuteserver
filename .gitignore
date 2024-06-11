@@ -547,3 +547,12 @@ _deps
 
 # End of https://www.toptal.com/developers/gitignore/api/cmake
 
+# Created by https://www.toptal.com/developers/gitignore/api/ninja
+# Edit at https://www.toptal.com/developers/gitignore?templates=ninja
+
+### Ninja ###
+.ninja_deps
+.ninja_log
+build.ninja
+
+# End of https://www.toptal.com/developers/gitignore/api/ninja
