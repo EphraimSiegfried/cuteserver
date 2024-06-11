@@ -67,7 +67,7 @@ Now set your preferred configuration in the configuration file for the web serve
 ```
 
 
-For applications that need CGI scripts that rely on external libraries please refer to the example configuration in the example_app folder.
+For applications that need CGI scripts that rely on external libraries please refer to the example configuration in the example_app folder. Note that CGI scripts need the .cgi file extension.
 
 
 
