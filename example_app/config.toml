@@ -12,3 +12,12 @@
         "/api/messages" = "/cgi-bin/main.cgi"
         "/messages" = "/cgi-bin/main.cgi"
 
+[resource.notcute]
+    domain = "kitty.pumuckipla.net"
+    root = "/content"
+    cgi_bin_dir = "/webs/content/cgi-bin"
+    [resource.notcute.remaps]
+        "/clients/tschau" = "/cgi-bin/first.cgi"
+        "/api/messages" = "/cgi-bin/main.cgi"
+        "/messages" = "/cgi-bin/main.cgi"
+
