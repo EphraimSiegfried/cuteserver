@@ -8,11 +8,10 @@ Initially, we used \textbf{Makefiles} to build the source code, but this approac
 Our implementation strategy for the web server was iterative, starting with small, manageable tasks and progressively tackling more complex ones. We regularly tested the code by running it with different inputs to ensure functionality.
 
 \subsection*{Project Structure} 
-We tackled the implementation of our web server by structuruing the code into 6 core modules. In the main module the server socket is set up and incoming TCP connections are handled through a threadpool. The parser module deserializes the request and puts the headers into a hashmap to simplify further processing. The request module contains the logic for handling static and CGI requests and set appropriate response headers. In the CGI handler module CGI scripts are spawned and their output is read. The response module serializes the response and sends it. Additionally, the config module handles TOML configurations set by the user. 
+We tackled the implementation of our web server by structuring the code into 6 core modules. In the main module the server socket is set up and incoming TCP connections are handled through a threadpool. The parser module deserializes the request and puts the headers into a hashmap to simplify further processing. The request module contains the logic for handling static and CGI requests and set appropriate response headers. In the CGI handler module CGI scripts are spawned and their output is read. The response module serializes the response and sends it. Additionally, the config module handles TOML configurations set by the user. 
 
 \subsection*{Static File Requests}
-Each incoming request is parsed into request line, headers and body, and saved in a struct called request\_info. We differentiate between static (GET or HEAD) and dynamic (GET or POST) requests. 
-For static requests, we access the file to receive metadata such as content length and type. For HEAD-Requests only the Headers are sent, for GET-Requests the file is also sent.  
+When a static request enters the server, the requested file is located and read. We assemble metadata such as content length and type to form the response headers. If it's a GET-Request, we send the headers and the file, for HEAD-Requests only the headers are sent. If the file cannot be found or another error is encountered, we send an error response with the help of http.cat \footnote{\url{https://http.cat}}. 
 
 \subsection*{CGI}
 Dynamic Request are handled with CGI. This means the incoming request is parsed, then passed to the CGI handler which creates a new process running the corresponding cgi script. The CGI Protocol defines "meta-variables" \footnote{RFC 3875. CGI Specification. Section 4.1 Request Meta-Variables. \url{https://datatracker.ietf.org/doc/html/rfc3875#section-4.1}} which have to be passed from server to CGI script using environment variables. \\
@@ -31,8 +30,6 @@ Communication between cgi process and server (parent process) is enabled through
 From the beginning, we aimed for our web server to support hosting multiple resources connected to different domain names. To achieve this multidomain support, we needed to make the web server configurable. To ensure user-friendly configuration, we used \textbf{TOML} files. The web server parses a configuration file listing all resources and their locations for the server to serve. Additionally, users can specify resource-independent settings, such as the number of active worker threads and log storage locations. We also provide a command line interface where users can specify the TCP address and the path to the configuration file.
 
 \subsection*{Example Application}
-% TODO: synchronization 
-
 We had several web applications to test our web server. Initially, we used simple HTML files and gradually added more complex ones. Eventually, we developed a more sophisticated application using the React framework for the front end. This application is a simple chat app that makes POST requests when users submit chat messages. These POST requests are handled by our backend service, which stores the chat messages in a file and sends the content to clients. We initially wrote this service using the Flask framework in Python to test if interpreted languages could work as CGI scripts. While this worked, we later translated the backend Python script to a C script to achieve faster response times by running compiled executables. 
 
 \begin{figure}[h]
