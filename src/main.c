@@ -215,8 +215,6 @@ int main(int argc, char *argv[]) {
         }
         log_info("New connection accepted from %s:%d", inet_ntoa(client_sock_i->client_address.sin_addr), ntohs(client_sock_i->client_address.sin_port));
 
-        // setsockopt(*client_sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-
         thpool_add_work(thpool, serve, client_sock_i);
     }
 }
