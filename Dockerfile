@@ -28,6 +28,8 @@ WORKDIR /app/backend
 RUN apt-get update && apt-get install -y cmake libjson-c-dev
 COPY example_app/backend/CMakeLists.txt .
 COPY example_app/backend/main.c .
+COPY example_app/backend/first.c .
+RUN gcc -o first.cgi first.c
 RUN cmake . && make
 
 # stage 4: final
@@ -46,6 +48,7 @@ WORKDIR /content
 COPY example_app/config.toml /
 COPY --from=node-build /app/frontend/dist/ .
 COPY --from=cmake-build /app/backend/main.cgi ./cgi-bin/
+COPY --from=cmake-build /app/backend/first.cgi ./cgi-bin/
 
 ENTRYPOINT ["/usr/bin/tini", "--", "cuteserver", "-a", "0.0.0.0", "-p", "8888", "-c", "/config.toml"]
 
