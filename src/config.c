@@ -85,14 +85,6 @@ int parse_config(char *path) {
             sc_map_put_str(&remaps_map, key, toml_string_in(remaps, key).u.s);
         }
         conf->resources[j].remaps = remaps_map;
-        const char *key;
-        const char *value;
-        sc_map_foreach(&conf->resources[0].remaps, key, value) {
-            printf("Key:[%s], Value:[%s] \n", key, value);
-        }
-        sc_map_foreach(&conf->resources[1].remaps, key, value) {
-            printf("KEY:[%s], Value:[%s] \n", key, value);
-        }
     }
     conf->identifier = identifier;
 
