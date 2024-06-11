@@ -19,7 +19,7 @@ In Figure 4, we showcase our first successful keep-alive connection. Here, two t
 \end{figure}
 \vspace{-15pt}
 \subsection*{Performance Testing}
-We wanted to test the influence of the number of worker threads on the performance of our application. For this we used \textbf{Locust} \footnote{https://locust.io/} to tests POST and GET requests to our application, as well as static file requests. 
+We wanted to test the influence of the number of worker threads on the performance of our application. For this we used \textbf{Locust} \footnote{\url{https://locust.io/}} to tests POST and GET requests to our application, as well as static file requests. 
 \subsubsection*{Static File Tests}
 We conducted these tests using the following Locust Configuration: 500 virtual users, ramping up at 50 users/second, for a runtime of 60 seconds.Requests were made to a static file hosted on a home server with 4 cores, and multithreading was managed by OpenMP.
 The graphs for 2 versus 3 worker threads exhibit similar trends, so the application runs relatively stable. The graph shows an initial peak in response time, followed by a gradual decline and stabilization at lower values. We can only explain this result by assuming that the responses are being cached somewhere.

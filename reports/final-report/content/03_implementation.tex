@@ -1,7 +1,7 @@
 \section*{Implementation}
 
 \subsection*{Development Environment} 
-The development of Cuteserver was primarily accomplished through pair programming. We held regular meetings where we shared our terminals using a shell sharing tool called \textbf{sshx} \footnote{SSHX. https://sshx.io/}. This tool was particularly effective for collaboration since we both used \textbf{Neovim} as our code editor. \\
+The development of Cuteserver was primarily accomplished through pair programming. We held regular meetings where we shared our terminals using a shell sharing tool called \textbf{sshx} \footnote{SSHX. \url{https://sshx.io/}}. This tool was particularly effective for collaboration since we both used \textbf{Neovim} as our code editor. \\
  
 Initially, we used \textbf{Makefiles} to build the source code, but this approach was inefficient due to frequent adjustments. As the project grew more complex, we decided to use \textbf{CMake} for more efficient project building and file generation. \\
 
@@ -15,16 +15,16 @@ Each incoming request is parsed into request line, headers and body, and saved i
 For static requests, we access the file to receive metadata such as content length and type. For HEAD-Requests only the Headers are sent, for GET-Requests the file is also sent.  
 
 \subsection*{CGI}
-Dynamic Request are handled with CGI. This means the incoming request is parsed, then passed to the CGI handler which creates a new process running the corresponding cgi script. The CGI Protocol defines "meta-variables" \footnote{RFC 3875. CGI Specification. Section 4.1 Request Meta-Variables. https://datatracker.ietf.org/doc/html/rfc3875#section-4.1} which have to be passed from server to CGI script using environment variables. \\
+Dynamic Request are handled with CGI. This means the incoming request is parsed, then passed to the CGI handler which creates a new process running the corresponding cgi script. The CGI Protocol defines "meta-variables" \footnote{RFC 3875. CGI Specification. Section 4.1 Request Meta-Variables. \url{https://datatracker.ietf.org/doc/html/rfc3875#section-4.1}} which have to be passed from server to CGI script using environment variables. \\
 
-The CGI process is started using the \textbf{execve} function, allowing us to pass the environment variables as an argument. Additional data has to be passed to the child process through standard in/output. \footnote{Mapping UNIX pipe descriptors to stdin and stdout. http://www.unixwiz.net/techtips/remap-pipe-fds.html}
-Communication between cgi process and server (parent process) is enabled through pipes. A pair of pipe descriptors is created before the child process is forked. Then, the child's descriptors are redirected to standard input and standard output \footnote{Pipes. http://www.fmc-modeling.org/category/projects/apache/amp/A\_4\_Pipes.html} (See Figure 3).
+The CGI process is started using the \textbf{execve} function, allowing us to pass the environment variables as an argument. Additional data has to be passed to the child process through standard in/output. \footnote{Mapping UNIX pipe descriptors to stdin and stdout. \url{http://www.unixwiz.net/techtips/remap-pipe-fds.html}}
+Communication between cgi process and server (parent process) is enabled through pipes. A pair of pipe descriptors is created before the child process is forked. Then, the child's descriptors are redirected to standard input and standard output \footnote{Pipes. \url{http://www.fmc-modeling.org/category/projects/apache/amp/A\_4\_Pipes.html}} (See Figure 3).
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.7\textwidth]{figures/Pipes_BD.pdf}
 	\caption{Pipe Redirection}
-    \floatfoot{\small Source: http://www.fmc-modeling.org/category/projects/apache/amp/A\_4\_Pipes.html}
+    \floatfoot{\small Source: \url{http://www.fmc-modeling.org/category/projects/apache/amp/A\_4\_Pipes.html}}
 \end{figure}
 
 \subsection*{Server Configuration}
