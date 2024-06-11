@@ -39,7 +39,6 @@ int handle_dynamic_request(int *sock, request_info *req_i) {
     int cgi_output_len = run_cgi_script(req_i, &cgi_output);
 
     response_info response_i;
-    log_debug("CGI Output: %s", cgi_output);
 
     response_i.status_msg = "Ok";
     response_i.status_code = 200;

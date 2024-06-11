@@ -1,6 +1,5 @@
 #include "response.h"
 #include "../deps/log/log.h"
-#include "parser.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
