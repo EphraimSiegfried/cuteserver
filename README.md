@@ -69,8 +69,6 @@ Now set your preferred configuration in the configuration file for the web serve
 
 For applications that need CGI scripts that rely on external libraries please refer to the example configuration in the example_app folder.
 
-
-
 ### Building Cuteserver from scratch
 
 **Requirements**: cmake, make, git, gcc
@@ -82,4 +80,6 @@ cmake .
 make
 ```
 
-Now it should be possible to run `cuteserver` in the command line
+Now it should be possible to run `cuteserver` in the command 
+
+Note: The default path for the configuration file is "./config.toml", so when you build from scratch, it uses the config.toml file at root level. You can provide another configuration path using the -p argument. You might need to adjust the paths in your configuration file and compile the executables (cgi-scripts) before running. 
