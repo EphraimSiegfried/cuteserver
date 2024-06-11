@@ -12,12 +12,3 @@
         "/clients/hello" = "/cgi-bin/first.cgi"
         "/api/messages" = "/cgi-bin/main.cgi"
         "/messages" = "/cgi-bin/main.cgi"
-
-[resource.uncute]
-    domain = "kitty.pumuckipla.net"
-    root = "/content"
-    cgi_bin_dir = "/webs/content/cgi-bin"
-    [resource.cute.remaps]
-        "/clients/tschau" = "/cgi-bin/first.cgi"
-        "/api/messages" = "/cgi-bin/main.cgi"
-        "/messages" = "/cgi-bin/main.cgi"
