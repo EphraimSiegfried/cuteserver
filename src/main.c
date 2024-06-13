@@ -110,6 +110,7 @@ void serve(void *client_info) {
 
     } while (keep_alive);
     close(*client_socket);
+    free(client_sock_i);
     return;
 }
 
