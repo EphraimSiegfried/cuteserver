@@ -6,12 +6,14 @@
 \usepackage{subcaption}
 \usepackage{lipsum}
 \usepackage{graphicx}
-\usepackage{enumitem}% http://ctan.org/pkg/enumitem
+\usepackage{enumitem}% \url{\url{\url{http://ctan.org/pkg/enumitem}}}
 \usepackage{wrapfig}
-\setlist{noitemsep, topsep=1pt,leftmargin=*} %format itemize etc.
+\usepackage{hyperref}
+\setlist{leftmargin=*} %format itemize etc.
 \setlength{\parindent}{0pt}
-\title{Cuteserver: A web server written in C \\ 
-\large Project for the Lecture "Operating Systems" FS24}
+\title{Cuteserver: A Web Server Written in C \\
+\vspace{\baselineskip}
+\large Project for the Operating Systems Lecture}
 \author{Rahel Kempf \and Ephraim Siegfried}
 
 \begin{document}
@@ -23,7 +25,6 @@
 \input{content/03_implementation}
 \pagebreak
 \input{content/04_results_discussion}
-\pagebreak
 \input{content/05_conclusion}
 \pagebreak
 \input{content/06_references}
